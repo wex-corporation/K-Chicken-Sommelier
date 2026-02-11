@@ -404,9 +404,20 @@ body {
   position: relative;
 }
 
-.match-card-image::after {
+.match-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.match-card-image.is-placeholder::after {
   content: '🍗';
   font-size: 48px;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
 }
 
 .match-card-badge {
@@ -433,10 +444,30 @@ body {
   line-height: 1.2;
 }
 
+.match-card-meta {
+  cursor: pointer;
+}
+
+.match-card-brand-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.match-card-brand-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+  background: #fff;
+  flex-shrink: 0;
+}
+
 .match-card-brand {
   font-size: var(--font-sm);
   color: var(--text-secondary);
-  margin-top: var(--space-xs);
 }
 
 .match-card-score {

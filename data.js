@@ -297,6 +297,92 @@ const QUIZ_QUESTIONS = [
 ];
 
 // Flatten to single menu list for scoring
+function getDomainFromUrl(url) {
+  if (!url) return '';
+  const match = String(url).match(/^https?:\/\/([^/?#]+)/i);
+  if (!match) return '';
+  return match[1].replace(/^www\./, '');
+}
+
+function hashSeed(text) {
+  return text.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+function pickFromPool(pool, seedText) {
+  return pool[hashSeed(seedText) % pool.length];
+}
+
+function buildCommonsImageUrl(filename) {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
+}
+
+const REAL_MENU_IMAGE_POOL = {
+  fried: [
+    buildCommonsImageUrl('Korean Fried Chicken.jpg'),
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Korean fried chicken (409217776).jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban) (cropped).jpg')
+  ],
+  spicy: [
+    buildCommonsImageUrl('Korean fried chicken 7 dari.jpg'),
+    buildCommonsImageUrl('Korean fried chicken 5 padak.jpg'),
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Buffalo_wings.jpg')
+  ],
+  saucy: [
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg')
+  ],
+  wing: [
+    buildCommonsImageUrl('Fried_Chicken_Wings_(54282490120).jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings_(52769476180).jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg'),
+    buildCommonsImageUrl('Buffalo_Wings.jpg')
+  ],
+  roast: [
+    buildCommonsImageUrl('Roast_Chicken.jpg'),
+    buildCommonsImageUrl('Roast_Chicken_(505826806).jpg'),
+    buildCommonsImageUrl('Roast_Chicken_(6987686841).jpg'),
+    buildCommonsImageUrl('Grilled_chicken.JPG'),
+    buildCommonsImageUrl('GRILLED_CHICKEN.jpg'),
+    buildCommonsImageUrl('Grilled_chickens.jpg')
+  ],
+  gizzard: [
+    buildCommonsImageUrl('Chicken_Gizzard.jpg')
+  ]
+};
+
+function buildBrandImageUrl(brand) {
+  const domain = getDomainFromUrl(brand.website || brand.logoPage || brand.menuPage);
+  if (!domain) return '';
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
+}
+
+function buildMenuImageUrl(brand, menu) {
+  const id = menu.id || '';
+  const isRoastStyle = brand.group === 'Oven & Roasted'
+    || /roast|grilled|whole/i.test(menu.menu);
+  const isSpicy = (menu.spiciness_1to5 || 0) >= 4
+    || (menu.tags?.SweetSpicy || 0) >= 3
+    || /hot|volcano|red|spicy|ddaengcho/i.test(id);
+  const isSaucy = (menu.tags?.Saucy || 0) >= 2 || /seasoned|mayo|yangnyeom/i.test(id);
+
+  if (/gizzard/i.test(id)) return REAL_MENU_IMAGE_POOL.gizzard[0];
+  if (/wing/i.test(id)) return pickFromPool(REAL_MENU_IMAGE_POOL.wing, id);
+  if (isRoastStyle) return pickFromPool(REAL_MENU_IMAGE_POOL.roast, id);
+  if (isSpicy) return pickFromPool(REAL_MENU_IMAGE_POOL.spicy, id);
+  if (isSaucy) return pickFromPool(REAL_MENU_IMAGE_POOL.saucy, id);
+
+  return pickFromPool(REAL_MENU_IMAGE_POOL.fried, id);
+}
+
 const MENU_ITEMS = KCHICKEN_BRANDS.flatMap(b =>
   b.menus.map(m => ({
     id: m.id,
@@ -308,7 +394,9 @@ const MENU_ITEMS = KCHICKEN_BRANDS.flatMap(b =>
     sweetness: m.sweetness_1to5,
     texture: m.texture,
     tags: m.tags,
-    image: m.image,
+    image: buildMenuImageUrl(b, m),
+    fallbackImage: m.image,
+    brandImage: buildBrandImageUrl(b),
     website: b.website,
     logoPage: b.logoPage,
     menuPage: b.menuPage,

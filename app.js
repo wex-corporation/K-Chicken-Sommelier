@@ -287,19 +287,22 @@ function renderMatchCards() {
     const lang = state.language || 'en';
     const strings = UI_STRINGS[lang];
 
-    container.innerHTML = state.matches.map((item, index) => `
+    container.innerHTML = state.matches.map(item => `
     <div class="match-card">
       <div class="match-card-image" onclick="window.open('${item.menuPage}', '_blank')" style="cursor: pointer; overflow: hidden;">
-        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img class="match-card-photo" src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${item.name}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         <div class="match-card-badge">
           <span class="badge ${item.badge === 'Spicy' ? 'badge-spicy' : ''}">${item.badge}</span>
         </div>
       </div>
       <div class="match-card-content">
         <div class="match-card-header">
-          <div onclick="window.open('${item.website}', '_blank')" style="cursor: pointer;">
+          <div class="match-card-meta" onclick="window.open('${item.website}', '_blank')">
             <div class="match-card-name">${item.name} <span style="font-size: 12px; vertical-align: middle;">🔗</span></div>
-            <div class="match-card-brand">${item.brand}</div>
+            <div class="match-card-brand-row">
+              ${item.brandImage ? `<img class="match-card-brand-logo" src="${item.brandImage}" alt="${item.brand} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
+              <div class="match-card-brand">${item.brand}</div>
+            </div>
           </div>
           <div class="match-card-score">
             <div class="match-card-score-value">${item.score}</div>
@@ -330,6 +333,32 @@ function renderMatchCards() {
       </div>
     </div>
   `).join('');
+
+    attachMatchCardImageFallbacks(container);
+}
+
+function attachMatchCardImageFallbacks(container) {
+    container.querySelectorAll('.match-card-photo').forEach(img => {
+        img.addEventListener('error', () => {
+            const fallback = img.dataset.fallback;
+            const isFallbackApplied = img.dataset.fallbackApplied === 'true';
+
+            if (fallback && !isFallbackApplied) {
+                img.dataset.fallbackApplied = 'true';
+                img.src = fallback;
+                return;
+            }
+
+            img.style.display = 'none';
+            img.closest('.match-card-image')?.classList.add('is-placeholder');
+        });
+    });
+
+    container.querySelectorAll('.match-card-brand-logo').forEach(img => {
+        img.addEventListener('error', () => {
+            img.style.display = 'none';
+        });
+    });
 }
 
 function updatePremiumSection() {
