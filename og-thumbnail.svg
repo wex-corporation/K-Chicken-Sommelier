@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E"/>
+      <stop offset="50%" style="stop-color:#16213E"/>
+      <stop offset="100%" style="stop-color:#E31837"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFC72C"/>
+      <stop offset="100%" style="stop-color:#FF6B6B"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Subtle pattern -->
+  <circle cx="100" cy="100" r="200" fill="rgba(227,24,55,0.08)"/>
+  <circle cx="1100" cy="530" r="250" fill="rgba(255,199,44,0.06)"/>
+  <circle cx="600" cy="315" r="300" fill="rgba(255,255,255,0.02)"/>
+  
+  <!-- Chicken emoji -->
+  <text x="600" y="250" font-size="120" text-anchor="middle" dominant-baseline="middle">🍗</text>
+  
+  <!-- Title -->
+  <text x="600" y="370" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="64" font-weight="800" fill="white" text-anchor="middle" dominant-baseline="middle">K-Chicken Sommelier</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="430" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.8)" text-anchor="middle" dominant-baseline="middle">Find Your Perfect Korean Chicken Match</text>
+  
+  <!-- Accent line -->
+  <rect x="450" y="470" width="300" height="4" rx="2" fill="url(#accent)"/>
+  
+  <!-- Bottom tagline -->
+  <text x="600" y="520" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="600" fill="rgba(255,199,44,0.9)" text-anchor="middle" dominant-baseline="middle">30-Second Taste Quiz • Personalized Results</text>
+  
+  <!-- Korean flag colors accent dots -->
+  <circle cx="540" cy="560" r="6" fill="#CD2E3A"/>
+  <circle cx="570" cy="560" r="6" fill="#0047A0"/>
+  <circle cx="600" cy="560" r="6" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="630" cy="560" r="6" fill="#CD2E3A"/>
+  <circle cx="660" cy="560" r="6" fill="#0047A0"/>
+</svg>

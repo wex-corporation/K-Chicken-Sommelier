@@ -379,30 +379,78 @@ function renderResults() {
     // Profile chips could be rendered if needed, but simplified for now
 }
 
+// ========== Translation Helpers ==========
+function getTranslatedName(item, lang) {
+    const koName = item.name; // always Korean from raw data
+    if (lang === 'ko') return koName;
+    const t = MENU_NAME_TRANSLATIONS[koName];
+    if (t && t[lang]) return t[lang];
+    return koName; // fallback to Korean
+}
+
+function getTranslatedTags(item, lang) {
+    if (lang === 'ko') return item.flavor_tags;
+    return item.flavor_tags.map(tag => {
+        const t = FLAVOR_TAG_TRANSLATIONS[tag];
+        return (t && t[lang]) ? t[lang] : tag;
+    });
+}
+
+function getTranslatedDescription(item, lang) {
+    // Description is always in Korean from raw data
+    // For non-Korean, we keep Korean but show it in a helpful way
+    if (lang === 'ko') return item.description || '';
+    // For other languages, we won't machine-translate inline, just show Korean with context
+    return item.description || '';
+}
+
+function getTranslatedBadge(badge, lang) {
+    const t = BADGE_TRANSLATIONS[badge];
+    if (t && t[lang]) return t[lang];
+    return badge;
+}
+
 function renderMatchCards() {
     const container = document.getElementById('match-cards');
     if (!container) return;
 
-    // Translation not fully implemented in JS logic for new structure, fallback to EN keys or raw data
+    const lang = state.language || 'en';
     const strings = getStrings();
 
     if (state.matches.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 2rem;">No matches found with these exact filters. Try loosening your criteria!</div>';
+        const noMatchMsg = lang === 'ko' ? '이 조건에 맞는 결과가 없습니다. 조건을 변경해보세요!' :
+            lang === 'zh' ? '没有找到匹配的结果，请调整条件！' :
+                lang === 'ja' ? '条件に合う結果がありません。条件を変更してみてください！' :
+                    'No matches found with these exact filters. Try loosening your criteria!';
+        container.innerHTML = `<div style="text-align:center; padding: 2rem;">${noMatchMsg}</div>`;
         return;
     }
 
-    container.innerHTML = state.matches.map(item => `
+    const spicyLabel = strings.spiciness || 'Spiciness';
+    const crispyLabel = strings.crispiness || 'Crispiness';
+    const featuresLabel = lang === 'ko' ? '특징' : lang === 'zh' ? '特色' : lang === 'ja' ? '特徴' : 'Features';
+
+    container.innerHTML = state.matches.map(item => {
+        const displayName = getTranslatedName(item, lang);
+        const koName = item.name;
+        // Show both Korean original + translated name for non-Korean users
+        const nameDisplay = lang === 'ko' ? koName : `${displayName} <span style="font-size: 13px; color: #888; font-weight: 400;">(${koName})</span>`;
+        const tags = getTranslatedTags(item, lang);
+        const badge = getTranslatedBadge(item.badge, lang);
+        const desc = item.description || '';
+
+        return `
     <div class="match-card">
       <div class="match-card-image" onclick="window.open('${item.menuPage}', '_blank')" style="cursor: pointer; overflow: hidden;">
-        <img class="match-card-photo" src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${item.name}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        <img class="match-card-photo" src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${displayName}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         <div class="match-card-badge">
-          <span class="badge ${item.badge === 'Spicy' ? 'badge-spicy' : ''}">${item.badge}</span>
+          <span class="badge ${item.badge === 'Spicy' ? 'badge-spicy' : ''}">${badge}</span>
         </div>
       </div>
       <div class="match-card-content">
         <div class="match-card-header">
           <div class="match-card-meta" onclick="window.open('${item.website}', '_blank')">
-            <div class="match-card-name">${item.name} <span style="font-size: 12px; vertical-align: middle;">🔗</span></div>
+            <div class="match-card-name">${nameDisplay} <span style="font-size: 12px; vertical-align: middle;">🔗</span></div>
             <div class="match-card-brand-row">
               ${item.brandImage ? `<img class="match-card-brand-logo" src="${item.brandImage}" alt="${item.brand} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
               <div class="match-card-brand">${item.brand}</div>
@@ -416,23 +464,24 @@ function renderMatchCards() {
         
         <div class="mini-meters">
             <div class="mini-meter">
-                <div class="mini-meter-label">Spiciness</div>
+                <div class="mini-meter-label">${spicyLabel}</div>
                 <div class="mini-meter-bar"><div class="mini-meter-fill" style="width: ${item.spiciness * 20}%"></div></div>
             </div>
             <div class="mini-meter">
-                <div class="mini-meter-label">Crispiness</div>
+                <div class="mini-meter-label">${crispyLabel}</div>
                 <div class="mini-meter-bar"><div class="mini-meter-fill" style="width: ${item.crispiness * 20}%"></div></div>
             </div>
         </div>
         
         <div style="margin-top: 8px; font-size: 12px; color: #666;">
-            <strong>Features:</strong> ${item.flavor_tags.join(', ')}
+            <strong>${featuresLabel}:</strong> ${tags.join(', ')}
         </div>
 
-        <div class="match-card-reason">${item.description || ''}</div>
+        <div class="match-card-reason">${desc}</div>
       </div>
     </div>
-  `).join('');
+  `;
+    }).join('');
 
     attachMatchCardImageFallbacks(container);
 }
@@ -571,26 +620,92 @@ function getStrings() {
 }
 
 // ========== SHARE ==========
-function initShare() {
-    // Header share button (if kept)
-    document.getElementById('share-btn')?.addEventListener('click', () => handleSharePlatform('Link'));
+function buildShareText() {
+    const lang = state.language || 'en';
+    if (state.matches.length === 0) {
+        return lang === 'ko' ? 'K-Chicken Sommelier에서 나의 치킨을 찾아보세요!' :
+            lang === 'zh' ? '在K-Chicken Sommelier找到你的炸鸡！' :
+                lang === 'ja' ? 'K-Chicken Sommelierであなたのチキンを見つけよう！' :
+                    'Find your perfect Korean chicken with K-Chicken Sommelier!';
+    }
+    const top = state.matches[0];
+    const itemName = getTranslatedName(top, lang);
+    const header = lang === 'ko' ? `🍗 나의 치킨 소울메이트: ${itemName} (${top.brand})` :
+        lang === 'zh' ? `🍗 我的炸鸡灵魂伴侣: ${itemName} (${top.brand})` :
+            lang === 'ja' ? `🍗 私のチキンソウルメイト: ${itemName} (${top.brand})` :
+                `🍗 My Chicken Soulmate: ${itemName} (${top.brand})`;
+    const score = lang === 'ko' ? `매치 점수: ${top.score}점` :
+        lang === 'zh' ? `匹配分数: ${top.score}` :
+            lang === 'ja' ? `マッチ度: ${top.score}` :
+                `Match Score: ${top.score}`;
+    const cta = lang === 'ko' ? '나도 해보기 →' :
+        lang === 'zh' ? '我也试试 →' :
+            lang === 'ja' ? '私もやってみる →' :
+                'Try it yourself →';
+    return `${header}\n${score}\n\n${cta}\nhttps://k-chicken-sommelier.com`;
+}
 
-    // Results page share button
+function showToast(message) {
+    // Remove existing toast
+    document.querySelector('.share-toast')?.remove();
+    const toast = document.createElement('div');
+    toast.className = 'share-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+        background: #333; color: white; padding: 12px 24px; border-radius: 25px;
+        font-size: 14px; z-index: 10000; animation: toastFade 2.5s ease forwards;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2600);
+}
+
+function initShare() {
+    // Results page share button — primary share action
     const resShare = document.getElementById('btn-results-share');
     if (resShare) {
-        resShare.addEventListener('click', () => {
-            // Mock share
+        resShare.addEventListener('click', async () => {
+            const shareText = buildShareText();
             const lang = state.language || 'en';
-            const isKo = lang === 'ko';
-            const isZh = lang === 'zh';
-            const isJa = lang === 'ja';
 
-            let msg = "Results copied to clipboard!";
-            if (isKo) msg = "결과가 클립보드에 복사되었습니다!";
-            else if (isZh) msg = "结果已复制到剪贴板！";
-            else if (isJa) msg = "結果がクリップボードにコピーされました！";
+            // Try Web Share API first (mobile browsers)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'K-Chicken Sommelier',
+                        text: shareText,
+                        url: 'https://k-chicken-sommelier.com'
+                    });
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return; // user cancelled
+                }
+            }
 
-            alert(msg);
+            // Fallback: copy to clipboard
+            try {
+                await navigator.clipboard.writeText(shareText);
+                const msg = lang === 'ko' ? '📋 결과가 클립보드에 복사되었습니다!' :
+                    lang === 'zh' ? '📋 结果已复制到剪贴板！' :
+                        lang === 'ja' ? '📋 結果がクリップボードにコピーされました！' :
+                            '📋 Results copied to clipboard!';
+                showToast(msg);
+            } catch (e) {
+                // Last resort: select+copy with textarea
+                const ta = document.createElement('textarea');
+                ta.value = shareText;
+                ta.style.cssText = 'position:fixed;opacity:0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                const msg = lang === 'ko' ? '📋 복사 완료!' :
+                    lang === 'zh' ? '📋 已复制！' :
+                        lang === 'ja' ? '📋 コピーしました！' :
+                            '📋 Copied!';
+                showToast(msg);
+            }
         });
     }
 
@@ -598,7 +713,7 @@ function initShare() {
         el.addEventListener('click', closeShareModal);
     });
 
-    // Platform buttons
+    // Platform buttons in share modal
     document.querySelectorAll('[data-share-platform]').forEach(btn => {
         btn.addEventListener('click', () => {
             handleSharePlatform(btn.dataset.sharePlatform);
@@ -623,8 +738,29 @@ function closeShareModal() {
 }
 
 async function handleSharePlatform(platform) {
-    // Placeholder share logic for now
-    alert(`Shared to ${platform}!`);
+    const shareText = encodeURIComponent(buildShareText());
+    const shareUrl = encodeURIComponent('https://k-chicken-sommelier.com');
+
+    switch (platform) {
+        case 'x':
+            window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
+            break;
+        case 'facebook':
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`, '_blank');
+            break;
+        case 'instagram':
+            // Instagram doesn't have a share URL — copy and notify
+            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
+            showToast(state.language === 'ko' ? '📋 인스타그램에 붙여넣기 하세요!' : '📋 Paste this on Instagram!');
+            break;
+        case 'copy':
+            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
+            showToast(state.language === 'ko' ? '📋 복사 완료!' : '📋 Copied!');
+            break;
+        default:
+            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
+            showToast('📋 Copied!');
+    }
     closeShareModal();
 }
 
