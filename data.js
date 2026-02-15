@@ -1,302 +1,623 @@
-// K-Chicken Sommelier — Real Brand Dataset (EN) - Full 20 Brands
+// K-Chicken Sommelier — Real Brand Dataset (Updated)
+// Source: User provided JSON
 
-const KCHICKEN_BRANDS = [
-  // ===== THE BIG 3 =====
+const CHICKEN_RAW_DATA = [
   {
-    id: "kyochon", group: "The Big 3", brand: "Kyochon Chicken",
-    website: "https://www.kyochon.com/",
-    logoPage: "https://www.kyochon.com/",
-    menuPage: "https://m.kyochon.com/menu/menu_list",
-    brand_features: "Soy sauce chicken icon. Thin batter, double-fried, sauce brushed piece-by-piece.",
-    menus: [
-      { id: "kyochon_honey_combo", menu: "Honey Combo", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Crispy/Chewy", characteristics: "Bestseller. Sweet-salty honey base.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 2, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 2, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 1, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Honey+Combo" },
-      { id: "kyochon_original", menu: "Kyochon Original", spiciness_1to5: 1, sweetness_1to5: 2, texture: "Thin/Crispy", characteristics: "Signature garlic soy. Very savory.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 3, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 2, NoSauce: 0, Value: 0, Filling: 1, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Kyochon+Original" },
-      { id: "kyochon_red_combo", menu: "Red Combo", spiciness_1to5: 4, sweetness_1to5: 1, texture: "Crispy", characteristics: "Cheongyang red pepper kick. Clean heat.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 1, SweetSpicy: 2, Garlic: 1, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 0, LightSauce: 2, NoSauce: 0, Value: 0, Filling: 1, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Red+Combo" },
-      { id: "kyochon_half_half", menu: "Half & Half", spiciness_1to5: 3, sweetness_1to5: 2, texture: "Mixed", characteristics: "Mix of Original (Soy) + Red series.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 1, Garlic: 2, SoyUmami: 2, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 2, NoSauce: 0, Value: 1, Filling: 1, Shareable: 3, LowMess: 1 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Half+%26+Half" },
-      { id: "kyochon_sal_sal", menu: "Sal Sal Chicken", spiciness_1to5: 0, sweetness_1to5: 1, texture: "Crunchy", characteristics: "Boneless with rice puffs coating.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 1, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Sal+Sal+Chicken" },
-      { id: "kyochon_black_secret", menu: "Black Secret", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crispy", characteristics: "Five-spice blend. Exotic oriental vibe.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 1, SweetSpicy: 1, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 1, NoSauce: 1, Value: 0, Filling: 1, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Black+Secret" },
-      { id: "kyochon_honey_jumbo_wing", menu: "Honey Jumbo Wing", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Crispy/Chewy", characteristics: "Larger wings version of Honey series.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 2, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 2, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 1, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Honey+Jumbo+Wing" }
-    ]
+    "brand": "BHC",
+    "menu_name": "뿌링클",
+    "spiciness": 1,
+    "crispiness": 4,
+    "flavor_tags": ["단짠", "치즈", "요거트", "시즈닝"],
+    "description": "블루치즈, 체다치즈, 양파, 마늘이 함유된 시즈닝을 뿌린 치킨, 뿌링뿌링 소스 필수",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
   },
   {
-    id: "bbq", group: "The Big 3", brand: "BBQ",
-    website: "https://bbq.co.kr/",
-    logoPage: "https://bbq.co.kr/",
-    menuPage: "https://bbq.co.kr/categories/7",
-    brand_features: "Fried chicken leader. Uses extra virgin olive oil for premium flavor.",
-    menus: [
-      { id: "bbq_golden_olive", menu: "Golden Olive", spiciness_1to5: 1, sweetness_1to5: 0, texture: "Extra Crispy", characteristics: "Signature. Juicy meat with crispy batter.", tags: { Crunchy: 3, Juicy: 2, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 0, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/FFC727/000000?text=Golden+Olive" },
-      { id: "bbq_secret_seasoned", menu: "Secret Seasoned", spiciness_1to5: 1, sweetness_1to5: 4, texture: "Moist", characteristics: "Classic sweet-sour red sauce (yangnyeom).", tags: { Crunchy: 1, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/FFC727/000000?text=Secret+Seasoned" },
-      { id: "bbq_jamaica_whole_leg", menu: "Jamaica Whole Leg", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Tender", characteristics: "Large thigh roasted with jerk sauce.", tags: { Crunchy: 0, Juicy: 3, CleanSalty: 1, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 1, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 3, Shareable: 1, LowMess: 2 }, image: "https://placehold.co/400x300/FFC727/000000?text=Jamaica+Whole+Leg" },
-      { id: "bbq_pepper_garlic", menu: "Pepper Garlic", spiciness_1to5: 2, sweetness_1to5: 3, texture: "Sticky/Crispy", characteristics: "Chinese-style fusion with scallion.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 2, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/FFC727/000000?text=Pepper+Garlic" },
-      { id: "bbq_galbi", menu: "Galbi", spiciness_1to5: 1, sweetness_1to5: 4, texture: "Crispy", characteristics: "Korean beef rib sauce flavor.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 2, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/FFC727/000000?text=Galbi" },
-      { id: "bbq_smoked_chicken", menu: "Smoked Chicken", spiciness_1to5: 0, sweetness_1to5: 1, texture: "Chewy", characteristics: "Smoked hip meat. Strong smoky aroma.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 3, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 1, LowMess: 3 }, image: "https://placehold.co/400x300/FFC727/000000?text=Smoked+Chicken" }
-    ]
+    "brand": "BHC",
+    "menu_name": "맛초킹",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["짭조름", "매콤", "간장", "파향"],
+    "description": "숙성 간장과 꿀을 넣어 만든 오리엔탈 블렌드 소스에 고추 토핑, 밥과 잘 어울림",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
   },
   {
-    id: "bhc", group: "The Big 3", brand: "bhc",
-    website: "https://www.bhc.co.kr/",
-    logoPage: "https://www.bhc.co.kr/",
-    menuPage: "https://www.bhc.co.kr/menu/best.asp",
-    brand_features: "Strong at unique seasonings and fusion sauces. Gen Z favorite.",
-    menus: [
-      { id: "bhc_bburinkle", menu: "Bburinkle", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Crispy", characteristics: "Blue-cheese & veggie seasoning. Yogurt dip.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Bburinkle" },
-      { id: "bhc_matcho_king", menu: "Matcho King", spiciness_1to5: 2, sweetness_1to5: 3, texture: "Chewy", characteristics: "Aged soy + honey with chili toppings.", tags: { Crunchy: 1, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 1, LightSauce: 2, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Matcho+King" },
-      { id: "bhc_gold_king", menu: "Gold King", spiciness_1to5: 0, sweetness_1to5: 3, texture: "Crispy", characteristics: "Soy sauce + honey. Similar to honey-soy.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 1, Garlic: 0, SoyUmami: 2, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 1, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 1, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Gold+King" },
-      { id: "bhc_red_king", menu: "Red King", spiciness_1to5: 4, sweetness_1to5: 2, texture: "Crispy", characteristics: "Hot chili sauce. Intense spiciness.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Red+King" },
-      { id: "bhc_curry_queen", menu: "Curry Queen", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crispy", characteristics: "Curry seasoning + red curry dip.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 1, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Curry+Queen" },
-      { id: "bhc_pota_king", menu: "Pota-King", spiciness_1to5: 0, sweetness_1to5: 1, texture: "Crunchy", characteristics: "Batter with real potato strips.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 0, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Pota-King" }
-    ]
+    "brand": "BHC",
+    "menu_name": "골드킹",
+    "spiciness": 1,
+    "crispiness": 4,
+    "flavor_tags": ["단짠", "간장", "꿀", "마늘"],
+    "description": "깊은 맛의 숙성 간장과 달콤한 꿀, 알싸한 마늘의 조화",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
   },
+  {
+    "brand": "BHC",
+    "menu_name": "레드킹",
+    "spiciness": 4,
+    "crispiness": 3,
+    "flavor_tags": ["알싸함", "매콤", "마늘"],
+    "description": "입안 가득 느껴지는 알싸한 매운맛, 청양고추 토핑",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "BHC",
+    "menu_name": "포테킹 후라이드",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["고소함", "감자", "바삭"],
+    "description": "튀김옷에 얇게 채 썬 감자가 박혀있어 극강의 바삭함과 고소함을 자랑함",
+    "composition": ["전체", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "BBQ",
+    "menu_name": "황금올리브치킨",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["고소", "담백", "육즙"],
+    "description": "최상급 엑스트라 버진 올리브유를 사용하여 바삭하고 육즙이 풍부한 후라이드의 정석",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "BBQ",
+    "menu_name": "자메이카 통다리구이",
+    "spiciness": 2,
+    "crispiness": 1,
+    "flavor_tags": ["이국적", "훈연향", "감칠맛"],
+    "description": "자메이카 저크 소스를 발라 두 번 구운 넓적다리 살, 독특한 향신료 향",
+    "composition": ["통다리"],
+    "cooking_method": "오븐구이"
+  },
+  {
+    "brand": "BBQ",
+    "menu_name": "황금올리브 핫크리스피",
+    "spiciness": 3,
+    "crispiness": 5,
+    "flavor_tags": ["매콤", "바삭", "깔끔"],
+    "description": "황금올리브의 바삭함에 매콤함을 더해 느끼함을 잡은 메뉴",
+    "composition": ["전체", "반반", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "교촌치킨",
+    "menu_name": "허니콤보",
+    "spiciness": 1,
+    "crispiness": 4,
+    "flavor_tags": ["달콤", "짭짤", "꿀"],
+    "description": "교촌 특유의 얇고 단단한 튀김옷에 허니 소스를 입힘, 눅눅해지지 않는 바삭함",
+    "composition": ["콤보", "전체", "순살", "윙봉"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "교촌치킨",
+    "menu_name": "교촌오리지날",
+    "spiciness": 1,
+    "crispiness": 3,
+    "flavor_tags": ["짭조름", "마늘간장", "감칠맛"],
+    "description": "교촌의 시그니처 마늘 간장 소스, 식으면 짠맛이 더 강하게 느껴짐",
+    "composition": ["전체", "콤보", "윙봉", "다리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "교촌치킨",
+    "menu_name": "레드콤보",
+    "spiciness": 4,
+    "crispiness": 3,
+    "flavor_tags": ["매콤", "칼칼함", "깔끔"],
+    "description": "국내산 청양 홍고추를 착즙해 만든 소스, 인위적이지 않고 깔끔하게 매운맛",
+    "composition": ["콤보", "전체", "순살", "윙봉", "다리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "교촌치킨",
+    "menu_name": "블랙시크릿",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["향신료", "간장", "오향"],
+    "description": "다섯 가지 맛과 향을 내는 오향에 맛간장과 청양고추를 더한 중화풍 치킨",
+    "composition": ["전체", "순살", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "굽네치킨",
+    "menu_name": "고추바사삭",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["알싸함", "깔끔", "청양고추"],
+    "description": "청양고추 파우더를 입혀 오븐에 구움, 마블링/고블링 소스와 함께 먹는 것이 특징",
+    "composition": ["전체", "순살", "윙봉", "콤보"],
+    "cooking_method": "오븐구이"
+  },
+  {
+    "brand": "굽네치킨",
+    "menu_name": "볼케이노",
+    "spiciness": 5,
+    "crispiness": 1,
+    "flavor_tags": ["화끈함", "불맛", "매움"],
+    "description": "불맛이 활활 타오르는 매운맛, 마그마 소스로 치밥(치킨+밥)을 해먹는 것이 인기",
+    "composition": ["전체", "순살", "윙봉", "콤보"],
+    "cooking_method": "오븐구이"
+  },
+  {
+    "brand": "굽네치킨",
+    "menu_name": "오리지널",
+    "spiciness": 1,
+    "crispiness": 2,
+    "flavor_tags": ["담백", "육즙", "건강"],
+    "description": "기름기를 쏙 뺀 오븐구이 치킨의 원조, 다이어트 메뉴로 선호됨",
+    "composition": ["전체", "순살", "윙봉", "콤보"],
+    "cooking_method": "오븐구이"
+  },
+  {
+    "brand": "처갓집양념치킨",
+    "menu_name": "슈프림양념치킨",
+    "spiciness": 1,
+    "crispiness": 2,
+    "flavor_tags": ["달콤", "느끼", "부드러움"],
+    "description": "바삭한 후라이드 위에 허니올리고당 야채양념과 신비의 하얀 소스가 뿌려짐",
+    "composition": ["전체", "순살", "두마리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "처갓집양념치킨",
+    "menu_name": "와락간장치킨",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["짭짤", "매콤", "불맛"],
+    "description": "깊은 볼(Wok)에서 강한 불로 볶아내어 간장 소스가 튀김옷에 깊이 배어듦",
+    "composition": ["전체", "순살", "윙봉"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "페리카나",
+    "menu_name": "양념치킨",
+    "spiciness": 1,
+    "crispiness": 2,
+    "flavor_tags": ["달콤", "마늘", "고추장"],
+    "description": "대한민국 양념치킨의 원조, 마늘과 고추장 베이스의 옛날 양념 맛",
+    "composition": ["전체", "반반", "순살", "두마리", "윙봉", "다리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "멕시카나",
+    "menu_name": "땡초치킨",
+    "spiciness": 5,
+    "crispiness": 2,
+    "flavor_tags": ["얼얼함", "화끈", "고추"],
+    "description": "인위적인 캡사이신이 아닌 실제 고추를 갈아 넣어 만든 깔끔하고 강렬한 매운맛",
+    "composition": ["전체", "반반", "순살", "두마리", "윙봉"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "멕시카나",
+    "menu_name": "치토스치킨",
+    "spiciness": 2,
+    "crispiness": 4,
+    "flavor_tags": ["짭짤", "스낵맛", "시즈닝"],
+    "description": "롯데제과 치토스와 콜라보, 과자 시즈닝 맛이 나며 엔젤코코 소스와 함께 제공",
+    "composition": ["전체", "순살", "윙봉"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "네네치킨",
+    "menu_name": "스노윙치즈",
+    "spiciness": 1,
+    "crispiness": 4,
+    "flavor_tags": ["치즈", "짭짤", "고소"],
+    "description": "입안에서 녹는 진한 치즈 가루가 듬뿍 뿌려진 치킨, 어린이 선호도 1위",
+    "composition": ["전체", "반반", "순살", "윙봉", "다리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "네네치킨",
+    "menu_name": "오리엔탈 파닭",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["톡쏨", "상큼", "아삭"],
+    "description": "싱싱한 파채와 새콤달콤 짭조름한 오리엔탈 겨자 소스의 조화",
+    "composition": ["전체", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "네네치킨",
+    "menu_name": "청양마요치킨",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["매콤", "크리미", "양파"],
+    "description": "아삭한 양파와 매콤한 청양고추, 고소한 마요 소스의 삼박자",
+    "composition": ["전체", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "호식이두마리치킨",
+    "menu_name": "매운간장치킨",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["짭짤", "매콤", "가성비"],
+    "description": "호식이두마리치킨의 베스트 메뉴, 짭조름한 간장에 끝맛이 살짝 매콤함",
+    "composition": ["두마리", "순살", "전체"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "60계치킨",
+    "menu_name": "간지치킨",
+    "spiciness": 1,
+    "crispiness": 3,
+    "flavor_tags": ["단짠", "고소", "누룽지"],
+    "description": "특제 간장 소스와 누룽지 가루가 어우러져 고소하고 담백한 맛",
+    "composition": ["전체", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "60계치킨",
+    "menu_name": "고추치킨",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["깔끔", "매콤", "감칠맛"],
+    "description": "감칠맛 나는 특제 간장 소스에 맵지 않은 고추로 버무려 깔끔한 맛",
+    "composition": ["전체", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "60계치킨",
+    "menu_name": "크크크치킨",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["극강바삭", "고소", "크럼블"],
+    "description": "크럼블, 크런치, 크리스피의 약자. 바삭함의 끝판왕이며 전용 소스에 찍어 먹음",
+    "composition": ["전체", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "노랑통닭",
+    "menu_name": "엄청큰후라이드",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["카레향", "바삭", "옛날통닭"],
+    "description": "가마솥에 튀겨 더욱 바삭하고 카레 향이 은은하게 나는 시장 통닭 스타일",
+    "composition": ["전체", "반반", "순살"],
+    "cooking_method": "가마솥튀김"
+  },
+  {
+    "brand": "노랑통닭",
+    "menu_name": "알싸한 마늘치킨",
+    "spiciness": 2,
+    "crispiness": 4,
+    "flavor_tags": ["알싸", "새콤", "마늘"],
+    "description": "바삭한 순살 치킨을 특제 마늘 소스에 찍어 먹거나 부어 먹는 메뉴",
+    "composition": ["순살"],
+    "cooking_method": "가마솥튀김"
+  },
+  {
+    "brand": "자담치킨",
+    "menu_name": "맵슐랭치킨",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["달콤", "매콤", "부드러움"],
+    "description": "마요 소스와 청양고추의 조화, 첫맛은 부드럽고 끝맛은 강렬하게 매움",
+    "composition": ["전체", "반반", "순살", "윙봉", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "푸라닭",
+    "menu_name": "블랙알리오",
+    "spiciness": 1,
+    "crispiness": 3,
+    "flavor_tags": ["깊은간장", "마늘", "고소"],
+    "description": "진한 간장 소스와 담백한 마늘 칩 토핑, 오븐에 굽고 다시 튀겨 겉바속촉",
+    "composition": ["전체", "반반", "순살", "윙봉", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "푸라닭",
+    "menu_name": "고추마요",
+    "spiciness": 3,
+    "crispiness": 2,
+    "flavor_tags": ["크리미", "매콤", "할라피뇨"],
+    "description": "고소한 마요네즈와 매콤한 청양고추의 만남, 할라피뇨 토핑이 느낌함을 잡아줌",
+    "composition": ["전체", "반반", "순살", "윙봉", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "푸라닭",
+    "menu_name": "콘소메이징",
+    "spiciness": 1,
+    "crispiness": 3,
+    "flavor_tags": ["단짠", "옥수수", "고소"],
+    "description": "옥수수 후레이크와 리얼 옥수수가 들어간 단짠단짠 메뉴",
+    "composition": ["전체", "반반", "순살", "윙봉", "콤보"],
+    "cooking_method": "오븐후라이드"
+  },
+  {
+    "brand": "지코바치킨",
+    "menu_name": "숯불양념구이",
+    "spiciness": 3,
+    "crispiness": 1,
+    "flavor_tags": ["불맛", "매콤", "치밥"],
+    "description": "튀김옷 없이 구워낸 치킨에 매콤한 양념, 남은 소스에 밥을 비벼 먹는 것이 국룰",
+    "composition": ["순살", "전체"],
+    "cooking_method": "숯불/오븐구이"
+  },
+  {
+    "brand": "지코바치킨",
+    "menu_name": "숯불소금구이",
+    "spiciness": 1,
+    "crispiness": 1,
+    "flavor_tags": ["담백", "고소", "깔끔"],
+    "description": "양념 없이 소금만으로 간을 하여 닭 본연의 담백한 맛을 살림",
+    "composition": ["순살", "전체"],
+    "cooking_method": "숯불/오븐구이"
+  },
+  {
+    "brand": "가마치통닭",
+    "menu_name": "한마리통닭",
+    "spiciness": 2,
+    "crispiness": 4,
+    "flavor_tags": ["고소", "옛날맛", "매콤염지"],
+    "description": "닭을 조각내지 않고 통째로 튀겨 육즙을 가둠, 껍질이 바삭하고 기본 염지가 매콤함",
+    "composition": ["통마리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "맘스터치",
+    "menu_name": "싸이순살",
+    "spiciness": 2,
+    "crispiness": 4,
+    "flavor_tags": ["매콤", "바삭", "가성비"],
+    "description": "100% 닭다리살로 만들어 부드럽고 쫄깃함, 기본적으로 살짝 매콤한 염지",
+    "composition": ["순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "맘스터치",
+    "menu_name": "꿀간장누룽지치킨",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["달콤", "바삭", "크런치"],
+    "description": "달콤 짭짤한 꿀간장 소스에 바삭한 라이스 크런치를 올림",
+    "composition": ["순살", "전체"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "또래오래",
+    "menu_name": "갈릭반핫양념반",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["마늘", "매콤", "진리"],
+    "description": "또래오래의 베스트셀러 조합, 짭조름한 갈릭과 매콤한 핫양념의 밸런스",
+    "composition": ["반반", "순살", "윙봉", "다리", "콤보"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "후라이드참잘하는집",
+    "menu_name": "후라이드",
+    "spiciness": 2,
+    "crispiness": 5,
+    "flavor_tags": ["매콤", "바삭", "기본기"],
+    "description": "브랜드 이름처럼 기본 후라이드가 가장 인기, 기본 염지가 꽤 매콤한 편",
+    "composition": ["전체", "반반", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "후라이드참잘하는집",
+    "menu_name": "킹트리플 양념치킨",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["크리미", "치즈", "양념"],
+    "description": "양념치킨 위에 치즈킹 소스와 크림킹 소스를 뿌려 풍부한 맛을 냄",
+    "composition": ["전체", "반반", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "바른치킨",
+    "menu_name": "대새레드",
+    "spiciness": 4,
+    "crispiness": 3,
+    "flavor_tags": ["매콤", "감칠맛", "새우"],
+    "description": "탱글탱글한 랍스터 새우가 토핑으로 올라간 매운 치킨",
+    "composition": ["전체", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "치킨마루",
+    "menu_name": "크리스피",
+    "spiciness": 2,
+    "crispiness": 5,
+    "flavor_tags": ["바삭", "가성비", "매콤"],
+    "description": "저렴한 가격에 즐길 수 있는 바삭한 크리스피 치킨",
+    "composition": ["전체", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "땅땅치킨",
+    "menu_name": "세트3번",
+    "spiciness": 2,
+    "crispiness": 2,
+    "flavor_tags": ["단짠", "훈연", "진리"],
+    "description": "땅땅치킨의 영원한 베스트셀러, 허브순살치킨과 땅땅불갈비의 조합",
+    "composition": ["순살"],
+    "cooking_method": "오븐+튀김"
+  },
+  {
+    "brand": "티바두마리치킨",
+    "menu_name": "알마간",
+    "spiciness": 2,
+    "crispiness": 3,
+    "flavor_tags": ["알싸", "마늘", "간장"],
+    "description": "알싸한 마늘과 간장의 조화, 생마늘 토핑이 특징",
+    "composition": ["두마리", "한마리", "순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "순수치킨",
+    "menu_name": "고마치킨",
+    "spiciness": 3,
+    "crispiness": 3,
+    "flavor_tags": ["고추", "마늘", "매콤"],
+    "description": "고추와 마늘이 듬뿍 들어간 양념 치킨",
+    "composition": ["전체", "순살", "반반"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "아웃닭",
+    "menu_name": "린드필드 후라이드 순살",
+    "spiciness": 1,
+    "crispiness": 5,
+    "flavor_tags": ["고소", "바삭", "푸짐"],
+    "description": "감자튀김과 떡튀김을 산더미처럼 쌓아주는 것이 특징",
+    "composition": ["순살", "뼈"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "또봉이통닭",
+    "menu_name": "또봉이통닭",
+    "spiciness": 2,
+    "crispiness": 4,
+    "flavor_tags": ["옛날맛", "바삭", "담백"],
+    "description": "얇은 튀김옷의 옛날 통닭 스타일, 저렴한 가격",
+    "composition": ["통마리"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "가마로강정",
+    "menu_name": "달콤강정",
+    "spiciness": 1,
+    "crispiness": 4,
+    "flavor_tags": ["달콤", "쫀득", "데리야끼"],
+    "description": "쌀가루 파우더를 사용해 식어도 바삭하고 쫀득한 닭강정",
+    "composition": ["순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "가마로강정",
+    "menu_name": "매콤강정",
+    "spiciness": 3,
+    "crispiness": 4,
+    "flavor_tags": ["매콤", "쫀득", "땅콩"],
+    "description": "청양고추 등을 사용한 매콤한 소스의 닭강정",
+    "composition": ["순살"],
+    "cooking_method": "일반튀김"
+  },
+  {
+    "brand": "KFC",
+    "menu_name": "핫크리스피치킨",
+    "spiciness": 3,
+    "crispiness": 5,
+    "flavor_tags": ["매콤", "바삭", "물결무늬"],
+    "description": "KFC의 대표 메뉴, 두꺼운 물결무늬 튀김옷과 매콤한 염지",
+    "composition": ["조각"],
+    "cooking_method": "압력튀김"
+  },
+  {
+    "brand": "KFC",
+    "menu_name": "오리지널치킨",
+    "spiciness": 1,
+    "crispiness": 2,
+    "flavor_tags": ["짭짤", "후추향", "부드러움"],
+    "description": "커넬 샌더스의 11가지 비밀 양념, 바삭하기보다 눅눅하고 짭조름한 맛이 특징",
+    "composition": ["조각"],
+    "cooking_method": "압력튀김"
+  }
+];
 
-  // ===== OVEN & ROASTED =====
-  {
-    id: "goobne", group: "Oven & Roasted", brand: "Goobne Chicken",
-    website: "https://www.goobne.co.kr/",
-    logoPage: "https://www.goobne.co.kr/",
-    menuPage: "https://www.goobne.co.kr/menu",
-    brand_features: "Top oven-baked brand. No oil, lower calories.",
-    menus: [
-      { id: "goobne_gochu_basasak", menu: "Gochu Basasak", spiciness_1to5: 2, sweetness_1to5: 1, texture: "Crispy", characteristics: "Cheongyang pepper powder. Signature.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 2, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 0, LightSauce: 1, NoSauce: 1, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/D35400/FFFFFF?text=Gochu+Basasak" },
-      { id: "goobne_original", menu: "Original", spiciness_1to5: 0, sweetness_1to5: 0, texture: "Chewy/Lean", characteristics: "Basic roasted. Diet-friendly.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 3, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 0, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/D35400/FFFFFF?text=Original" },
-      { id: "goobne_volcano", menu: "Volcano", spiciness_1to5: 5, sweetness_1to5: 2, texture: "Moist", characteristics: "Fire-spicy. Famous for rice-mix (chibap).", tags: { Crunchy: 0, Juicy: 3, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 3, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/D35400/FFFFFF?text=Volcano" },
-      { id: "goobne_galbi_cheonwang", menu: "Galbi Cheonwang", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Moist", characteristics: "Galbi flavor. Popular with kids.", tags: { Crunchy: 0, Juicy: 3, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/D35400/FFFFFF?text=Galbi+Cheonwang" },
-      { id: "goobne_namhae_garlic", menu: "Namhae Garlic", spiciness_1to5: 1, sweetness_1to5: 2, texture: "Crispy", characteristics: "Roasted garlic profile.", tags: { Crunchy: 1, Juicy: 2, CleanSalty: 2, SweetSpicy: 0, Garlic: 3, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/D35400/FFFFFF?text=Namhae+Garlic" }
-    ]
-  },
-  {
-    id: "puradak", group: "Oven & Roasted", brand: "Puradak",
-    website: "https://puradakchicken.com/",
-    logoPage: "https://puradakchicken.com/",
-    menuPage: "https://puradakchicken.com/menu",
-    brand_features: "Luxury vibe. Oven-fried method: baked then lightly fried.",
-    menus: [
-      { id: "puradak_black_alio", menu: "Black Alio", spiciness_1to5: 1, sweetness_1to5: 2, texture: "Crispy/Chewy", characteristics: "Deep soy + fried garlic chips. Signature.", tags: { Crunchy: 2, Juicy: 2, CleanSalty: 1, SweetSpicy: 0, Garlic: 3, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 2, NoSauce: 1, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/1A1A1A/D4AF37?text=Black+Alio" },
-      { id: "puradak_chili_mayo", menu: "Chili Mayo", spiciness_1to5: 3, sweetness_1to5: 3, texture: "Creamy", characteristics: "Jalapeño + mayo sauce. Sweet & spicy.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 1, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/1A1A1A/D4AF37?text=Chili+Mayo" },
-      { id: "puradak_corn_so_amazing", menu: "Corn-So-Amazing", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Crispy", characteristics: "Corn powder + real corn pieces.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 1, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/1A1A1A/D4AF37?text=Corn-So-Amazing" },
-      { id: "puradak_toowoomba", menu: "Toowoomba", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Thick/Rich", characteristics: "Spicy cream sauce (rose pasta vibe).", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 1, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/1A1A1A/D4AF37?text=Toowoomba" },
-      { id: "puradak_basil_festa", menu: "Basil Festa", spiciness_1to5: 0, sweetness_1to5: 2, texture: "Moist", characteristics: "Basil pesto + roasted tomato.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 1, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 1, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/1A1A1A/D4AF37?text=Basil+Festa" }
-    ]
-  },
-  {
-    id: "zikova", group: "Oven & Roasted", brand: "Zikova",
-    website: "https://www.gcova.co.kr/",
-    logoPage: "https://www.gcova.co.kr/",
-    menuPage: "https://www.gcova.co.kr/",
-    brand_features: "Charcoal-grilled chicken king. Famous for mixing sauce with rice.",
-    menus: [
-      { id: "zikova_seasoned_grilled", menu: "Seasoned Grilled", spiciness_1to5: 3, sweetness_1to5: 3, texture: "Tender", characteristics: "Signature. Rice-mix is essential.", tags: { Crunchy: 0, Juicy: 3, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 1, CheesyCreamy: 0, SmokyPepper: 3, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Seasoned+Grilled" },
-      { id: "zikova_salt_grilled", menu: "Salt Grilled", spiciness_1to5: 0, sweetness_1to5: 0, texture: "Chewy/Lean", characteristics: "Pure grilled. Highlights meat quality.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 3, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 0, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Salt+Grilled" }
-    ]
-  },
+// Quiz configuration matches the user's requested 4 categories:
+// 1. Spiciness (매운정도) - 1 to 5
+// 2. Crispiness (바삭함) - 1 to 5
+// 3. Composition (구성) - Hard filter (Boneless, Whole, Wings/Legs, Combo, Any)
+// 4. Flavor (맛특징) - Tags selection
 
-  // ===== CLASSIC & SEASONED =====
+const QUIZ_QUESTIONS = [
   {
-    id: "cheogajip", group: "Classic & Seasoned", brand: "Cheogajip",
-    website: "https://www.cheogajip.co.kr/",
-    logoPage: "https://www.cheogajip.co.kr/",
-    menuPage: "https://www.cheogajip.co.kr/menu",
-    brand_features: "Yangnyeom master. Uses vegetable stock for cleaner sweetness.",
-    menus: [
-      { id: "cheogajip_supreme_gold", menu: "Supreme Gold", spiciness_1to5: 0, sweetness_1to5: 5, texture: "Crispy/Soft", characteristics: "White signature sauce + red sauce. Brand icon.", tags: { Crunchy: 1, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 2, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Supreme+Gold" },
-      { id: "cheogajip_original_seasoned", menu: "Original Seasoned", spiciness_1to5: 1, sweetness_1to5: 4, texture: "Moist", characteristics: "Classic seasoned chicken standard.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Original+Seasoned" },
-      { id: "cheogajip_warak_soy", menu: "Warak (Soy)", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crispy", characteristics: "Sautéed soy/garlic. Savory.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 0, Garlic: 2, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 1, LightSauce: 2, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Warak" },
-      { id: "cheogajip_truffle_supreme", menu: "Truffle Supreme", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Soft", characteristics: "Supreme sauce with truffle aroma.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 2, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Truffle+Supreme" }
+    id: 'spiciness',
+    title: '매운 정도는?',
+    type: 'scale',
+    options: [
+      { label: '안 매운 (진라면 순한맛)', value: 1 },
+      { label: '살짝 매콤 (신라면 수준)', value: 2 },
+      { label: '매콤 (불닭볶음면 수준)', value: 3 },
+      { label: '매운 (핵불닭 수준)', value: 4 },
+      { label: '아주 매운 (신의 영역)', value: 5 }
     ]
   },
   {
-    id: "pelicana", group: "Classic & Seasoned", brand: "Pelicana",
-    website: "https://www.pelicana.co.kr/",
-    logoPage: "https://www.pelicana.co.kr/",
-    menuPage: "https://www.pelicana.co.kr/menu",
-    brand_features: "One of the oldest brands. Thin batter and classic garlic-onion red sauce.",
-    menus: [
-      { id: "pelicana_seasoned", menu: "Seasoned Chicken", spiciness_1to5: 1, sweetness_1to5: 4, texture: "Sticky/Moist", characteristics: "Long-running classic. Garlic & onion base.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 1, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Seasoned+Chicken" },
-      { id: "pelicana_fried", menu: "Fried Chicken", spiciness_1to5: 1, sweetness_1to5: 0, texture: "Thin/Crispy", characteristics: "Old-school thin crust style.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 0, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Fried+Chicken" },
-      { id: "pelicana_cheese_bburio", menu: "Cheese Bburio", spiciness_1to5: 0, sweetness_1to5: 3, texture: "Crispy", characteristics: "Cheese powder, sweet & salty.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Cheese+Bburio" }
+    id: 'crispiness',
+    title: '바삭함 정도는?',
+    type: 'scale',
+    options: [
+      { label: '부드러운 (1단계)', value: 1 },
+      { label: '약간 바삭 (2단계)', value: 2 },
+      { label: '바삭 (3단계)', value: 3 },
+      { label: '아주 바삭 (4단계)', value: 4 },
+      { label: '크런치 (5단계)', value: 5 }
     ]
   },
   {
-    id: "mexicana", group: "Classic & Seasoned", brand: "Mexicana",
-    website: "https://www.mexicana.co.kr/",
-    logoPage: "https://www.mexicana.co.kr/",
-    menuPage: "https://www.mexicana.co.kr/menu",
-    brand_features: "First-generation brand known for experimental collaborations.",
-    menus: [
-      { id: "mexicana_ddaengcho", menu: "Ddaengcho", spiciness_1to5: 5, sweetness_1to5: 2, texture: "Moist", characteristics: "Extremely spicy Korean chili style.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 3, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Ddaengcho" },
-      { id: "mexicana_cheetos", menu: "Cheetos Chicken", spiciness_1to5: 1, sweetness_1to5: 3, texture: "Crispy", characteristics: "Snack-flavor powder + sweet sauce.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 1, SmokyPepper: 0, Saucy: 0, LightSauce: 1, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Cheetos+Chicken" },
-      { id: "mexicana_modu_mayo", menu: "Modu-ui Mayo", spiciness_1to5: 1, sweetness_1to5: 3, texture: "Soft", characteristics: "Mayo base with garlic notes.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 1, Garlic: 2, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Modu-ui+Mayo" }
+    id: 'composition',
+    title: '선호하는 부위는?',
+    type: 'filter',
+    options: [
+      { label: '상관없음', value: 'any' },
+      { label: '순살', value: '순살' },
+      { label: '콤보 (다리+날개)', value: '콤보' },
+      { label: '윙봉', value: '윙봉' },
+      { label: '다리만', value: '다리' },
+      { label: '한마리 (뼈)', value: '전체' }
     ]
   },
   {
-    id: "nene", group: "Classic & Seasoned", brand: "NeNe Chicken",
-    website: "https://nenechicken.com/",
-    logoPage: "https://nenechicken.com/",
-    menuPage: "https://nenechicken.com/menu",
-    brand_features: "Packaging pioneer and early seasoning-powder trendsetter.",
-    menus: [
-      { id: "nene_snowing_cheese", menu: "Snowing Cheese", spiciness_1to5: 0, sweetness_1to5: 3, texture: "Crispy", characteristics: "Veggie + cheese powder. Kids' favorite.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 0, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Snowing+Cheese" },
-      { id: "nene_oriental_scallion", menu: "Oriental Scallion", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crunchy", characteristics: "Green onion + mustard sauce topping.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 1, LightSauce: 2, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 1 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Oriental+Scallion" },
-      { id: "nene_shocking_hot", menu: "Shocking Hot", spiciness_1to5: 5, sweetness_1to5: 1, texture: "Moist", characteristics: "Tear-jerking spicy.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 3, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Shocking+Hot" },
-      { id: "nene_cheongyang_mayo", menu: "Cheongyang Mayo", spiciness_1to5: 3, sweetness_1to5: 2, texture: "Creamy", characteristics: "Onion + spicy mayo topping.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 1, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 0, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/C0392B/FFFFFF?text=Cheongyang+Mayo" }
-    ]
-  },
-
-  // ===== TRENDY & VALUE =====
-  {
-    id: "60gye", group: "Trendy & Value", brand: "60 Gye",
-    website: "https://www.60chicken.co.kr/",
-    logoPage: "https://www.60chicken.co.kr/",
-    menuPage: "https://www.60chicken.co.kr/menu",
-    brand_features: "Clean taste concept: only 60 chickens per fresh oil vat.",
-    menus: [
-      { id: "60gye_gochu", menu: "Gochu (Pepper)", spiciness_1to5: 1, sweetness_1to5: 3, texture: "Moist", characteristics: "Soy base with minced mild peppers.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 2, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 2, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Gochu" },
-      { id: "60gye_ganji", menu: "Ganji (Soy/Nurungji)", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Chewy", characteristics: "Soy sauce + scorched rice powder.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 2, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Ganji" },
-      { id: "60gye_keukeukeu", menu: "Keu-Keu-Keu", spiciness_1to5: 0, sweetness_1to5: 1, texture: "Extra Crunchy", characteristics: "Triple-crunch style. Dipping sauces.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 1, NoSauce: 3, Value: 2, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Keu-Keu-Keu" },
-      { id: "60gye_tiger", menu: "Tiger Chicken", spiciness_1to5: 1, sweetness_1to5: 3, texture: "Crispy", characteristics: "Garlic powder + cornflakes. Sweet/salty.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 2, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 2, Value: 2, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Tiger+Chicken" }
-    ]
-  },
-  {
-    id: "norang", group: "Trendy & Value", brand: "Norang Tongdak",
-    website: "https://www.norangtongdak.co.kr/",
-    logoPage: "https://www.norangtongdak.co.kr/",
-    menuPage: "https://www.norangtongdak.co.kr/menu",
-    brand_features: "Market-style cauldron fry. Subtle curry scent, lower sodium.",
-    menus: [
-      { id: "norang_big_fried", menu: "Big Fried", spiciness_1to5: 1, sweetness_1to5: 0, texture: "Cracker-like", characteristics: "Subtle curry aroma. Stays crispy cold.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 2, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Big+Fried" },
-      { id: "norang_alssa_garlic", menu: "Alssa Garlic", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crispy", characteristics: "Garlic vinegar dipping sauce.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 0, Garlic: 3, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 2, NoSauce: 1, Value: 2, Filling: 2, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Alssa+Garlic" }
-    ]
-  },
-  {
-    id: "jadam", group: "Trendy & Value", brand: "Jadam Chicken",
-    website: "https://www.ejadam.co.kr/",
-    logoPage: "https://www.ejadam.co.kr/",
-    menuPage: "https://www.ejadam.co.kr/menu",
-    brand_features: "Nature-forward. Uses animal welfare-certified chickens.",
-    menus: [
-      { id: "jadam_mapchelin", menu: "Map-chelin", spiciness_1to5: 3, sweetness_1to5: 3, texture: "Chewy", characteristics: "Mayo + Cheongyang peppers. Spicy creamy.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 2, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 2, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/2ECC71/FFFFFF?text=Map-chelin" },
-      { id: "jadam_sriracha", menu: "Sriracha", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Crispy", characteristics: "Exotic spice with sriracha sauce.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 2, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 2, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/2ECC71/FFFFFF?text=Sriracha" }
-    ]
-  },
-  {
-    id: "hosigi", group: "Trendy & Value", brand: "Hosigi Double Chicken",
-    website: "https://www.9922.co.kr/",
-    logoPage: "https://www.9922.co.kr/",
-    menuPage: "https://www.9922.co.kr/menu",
-    brand_features: "Two-chickens-for-one value pioneer. Great quantity per price.",
-    menus: [
-      { id: "hosigi_spicy_soy", menu: "Spicy Soy", spiciness_1to5: 2, sweetness_1to5: 2, texture: "Salty", characteristics: "Steady seller. Mildly spicy soy.", tags: { Crunchy: 1, Juicy: 2, CleanSalty: 1, SweetSpicy: 1, Garlic: 0, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 1, LightSauce: 2, NoSauce: 0, Value: 3, Filling: 3, Shareable: 3, LowMess: 1 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Spicy+Soy" },
-      { id: "hosigi_lemon_cream", menu: "Lemon Cream", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Chewy", characteristics: "Glutinous rice batter. Sweet lemon cream.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 3, LightSauce: 0, NoSauce: 0, Value: 3, Filling: 2, Shareable: 3, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Lemon+Cream" }
-    ]
-  },
-  {
-    id: "huchamjal", group: "Trendy & Value", brand: "Huchamjal",
-    website: "https://www.hoocham.com/",
-    logoPage: "https://www.hoocham.com/",
-    menuPage: "https://www.hoocham.com/menu",
-    brand_features: "Affordable, high-quality fried. Strong takeaway discounts.",
-    menus: [
-      { id: "huchamjal_fried", menu: "Fried", spiciness_1to5: 2, sweetness_1to5: 0, texture: "Crispy", characteristics: "Basic marinade has spicy kick (KFC-like).", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 3, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Fried" },
-      { id: "huchamjal_king_triple", menu: "King Triple", spiciness_1to5: 0, sweetness_1to5: 4, texture: "Moist", characteristics: "Cheese sauce + cream sauce layers.", tags: { Crunchy: 0, Juicy: 2, CleanSalty: 0, SweetSpicy: 1, Garlic: 0, SoyUmami: 0, CheesyCreamy: 3, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 3, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=King+Triple" }
-    ]
-  },
-  {
-    id: "barun", group: "Trendy & Value", brand: "Barun Chicken",
-    website: "https://barunchicken.com/",
-    logoPage: "https://barunchicken.com/",
-    menuPage: "https://barunchicken.com/menu",
-    brand_features: "Oil-count system on box (max 58). Known for shrimp toppings.",
-    menus: [
-      { id: "barun_daesae_red", menu: "Daesae Red", spiciness_1to5: 4, sweetness_1to5: 2, texture: "Crispy", characteristics: "Large shrimp topping + spicy sauce.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 0, SweetSpicy: 3, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 2, Filling: 2, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Daesae+Red" },
-      { id: "barun_brown_rice", menu: "Brown Rice", spiciness_1to5: 0, sweetness_1to5: 0, texture: "Crunchy", characteristics: "Brown-rice batter for nuttiness.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 3, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 2, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Brown+Rice" }
-    ]
-  },
-  {
-    id: "toreore", group: "Trendy & Value", brand: "Toreore",
-    website: "https://www.toreore.com/",
-    logoPage: "https://www.toreore.com/",
-    menuPage: "https://www.toreore.com/board/menu/board_list.php",
-    brand_features: "Uses high-quality Moguchon (NH Nonghyup) chicken.",
-    menus: [
-      { id: "toreore_garlic_hot_half", menu: "Garlic/Hot Half", spiciness_1to5: 3, sweetness_1to5: 2, texture: "Mixed", characteristics: "Legendary combo: soy garlic + spicy.", tags: { Crunchy: 2, Juicy: 1, CleanSalty: 1, SweetSpicy: 2, Garlic: 2, SoyUmami: 2, CheesyCreamy: 0, SmokyPepper: 2, Saucy: 1, LightSauce: 1, NoSauce: 0, Value: 1, Filling: 2, Shareable: 3, LowMess: 1 }, image: "https://placehold.co/400x300/E31837/FFFFFF?text=Garlic%2FHot+Half" }
-    ]
-  },
-  {
-    id: "kkanbu", group: "Trendy & Value", brand: "Kkanbu Chicken",
-    website: "https://www.kkanbu.co.kr/",
-    logoPage: "https://www.kkanbu.co.kr/",
-    menuPage: "https://www.kkanbu.co.kr/menu",
-    brand_features: "Premium chicken-pub style. Dine-in experience focused.",
-    menus: [
-      { id: "kkanbu_crispy", menu: "Crispy", spiciness_1to5: 1, sweetness_1to5: 0, texture: "Crunchy", characteristics: "Thick, wavy batter (KFC style).", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 1, Filling: 2, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/1A1A1A/FFFFFF?text=Crispy" },
-      { id: "kkanbu_garlic_roast", menu: "Garlic Roast", spiciness_1to5: 1, sweetness_1to5: 1, texture: "Moist", characteristics: "Rotisserie topped with minced garlic.", tags: { Crunchy: 0, Juicy: 3, CleanSalty: 2, SweetSpicy: 0, Garlic: 3, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 1, NoSauce: 2, Value: 1, Filling: 3, Shareable: 2, LowMess: 2 }, image: "https://placehold.co/400x300/1A1A1A/FFFFFF?text=Garlic+Roast" }
-    ]
-  },
-  {
-    id: "moms_touch", group: "Trendy & Value", brand: "Mom's Touch",
-    website: "https://momstouch.co.kr/",
-    logoPage: "https://momstouch.co.kr/",
-    menuPage: "https://momstouch.co.kr/menu",
-    brand_features: "Burger franchise famous for high-quality, cheap chicken.",
-    menus: [
-      { id: "moms_touch_thigh_boneless", menu: "Thigh Boneless", spiciness_1to5: 2, sweetness_1to5: 0, texture: "Crispy", characteristics: "100% thigh meat. Great value.", tags: { Crunchy: 2, Juicy: 3, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 3, Filling: 3, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Thigh+Boneless" },
-      { id: "moms_touch_soy_garlic_thigh", menu: "Soy Garlic Thigh", spiciness_1to5: 1, sweetness_1to5: 3, texture: "Crispy", characteristics: "Salty-sweet garlic soy glaze.", tags: { Crunchy: 2, Juicy: 2, CleanSalty: 1, SweetSpicy: 1, Garlic: 3, SoyUmami: 3, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 2, LightSauce: 1, NoSauce: 0, Value: 3, Filling: 3, Shareable: 2, LowMess: 0 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Soy+Garlic+Thigh" }
-    ]
-  },
-  {
-    id: "gamachi", group: "Trendy & Value", brand: "Gamachi Tongdak",
-    website: "https://www.gamachi.co.kr/",
-    logoPage: "https://www.gamachi.co.kr/",
-    menuPage: "https://www.gamachi.co.kr/",
-    brand_features: "Market-style whole chicken. Very cheap, whole-fried.",
-    menus: [
-      { id: "gamachi_whole_chicken", menu: "Whole Chicken", spiciness_1to5: 2, sweetness_1to5: 0, texture: "Thin/Crispy", characteristics: "Spicy marinade. Crackling skin.", tags: { Crunchy: 3, Juicy: 1, CleanSalty: 2, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 1, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 3, Filling: 3, Shareable: 3, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Whole+Chicken" },
-      { id: "gamachi_fried_gizzards", menu: "Fried Gizzards", spiciness_1to5: 1, sweetness_1to5: 0, texture: "Chewy", characteristics: "Popular side snack (anju).", tags: { Crunchy: 1, Juicy: 1, CleanSalty: 3, SweetSpicy: 0, Garlic: 0, SoyUmami: 0, CheesyCreamy: 0, SmokyPepper: 0, Saucy: 0, LightSauce: 0, NoSauce: 3, Value: 2, Filling: 1, Shareable: 2, LowMess: 3 }, image: "https://placehold.co/400x300/F4D03F/000000?text=Fried+Gizzards" }
+    id: 'flavor',
+    title: '원하는 맛 특징은?',
+    type: 'tags',
+    options: [
+      { label: '단짠', value: '단짠' },
+      { label: '고소', value: '고소' },
+      { label: '매콤', value: '매콤' },
+      { label: '치즈', value: '치즈' },
+      { label: '마늘', value: '마늘' },
+      { label: '간장', value: '간장' },
+      { label: '깔끔', value: '깔끔' },
+      { label: '크리미', value: '크리미' },
+      { label: '불맛', value: '불맛' }
     ]
   }
 ];
 
-// Quiz Questions
-const QUIZ_QUESTIONS = [
-  {
-    id: 'crunch', title: 'How crunchy do you want it?', options: [
-      { label: 'Ultra crunchy', value: 'Ultra', tags: { Crunchy: 3 } },
-      { label: 'Crispy', value: 'Crispy', tags: { Crunchy: 2 } },
-      { label: 'Balanced', value: 'Balanced', tags: { Crunchy: 1, Juicy: 1 } },
-      { label: 'Soft & juicy', value: 'Juicy', tags: { Juicy: 3 } }
-    ]
-  },
-  {
-    id: 'heat', title: 'How spicy can you handle today?', options: [
-      { label: 'No spice', value: 'None', tags: { CleanSalty: 2 } },
-      { label: 'Mild', value: 'Mild', tags: { SweetSpicy: 1 } },
-      { label: 'Medium', value: 'Medium', tags: { SweetSpicy: 2 } },
-      { label: 'Hot', value: 'Hot', tags: { SweetSpicy: 3 } },
-      { label: 'Danger', value: 'Danger', tags: { SweetSpicy: 4 } }
-    ]
-  },
-  {
-    id: 'mood', title: 'What flavor mood are you craving?', options: [
-      { label: 'Clean & salty', value: 'Clean', tags: { CleanSalty: 3 } },
-      { label: 'Sweet & spicy', value: 'SweetSpicy', tags: { SweetSpicy: 3 } },
-      { label: 'Garlic & savory', value: 'Garlic', tags: { Garlic: 3 } },
-      { label: 'Soy & umami', value: 'Soy', tags: { SoyUmami: 3 } },
-      { label: 'Cheesy & creamy', value: 'Cheesy', tags: { CheesyCreamy: 3 } },
-      { label: 'Smoky / peppery', value: 'Smoky', tags: { SmokyPepper: 3 } }
-    ]
-  },
-  {
-    id: 'sauce', title: 'Sauce or no sauce?', options: [
-      { label: 'No sauce (pure fried)', value: 'NoSauce', tags: { NoSauce: 3, LowMess: 2 } },
-      { label: 'Light sauce', value: 'Light', tags: { LightSauce: 3 } },
-      { label: 'Saucy', value: 'Saucy', tags: { Saucy: 2 } },
-      { label: 'Extra saucy', value: 'Extra', tags: { Saucy: 3 } }
-    ]
-  },
+// Helper to reliably get domain for brand images (if websites were provided)
+// Since raw data doesn't have websites, we'll map common ones or use placeholders if needed.
+const BRAND_WEBSITES = {
+  "BHC": "https://www.bhc.co.kr",
+  "BBQ": "https://bbq.co.kr",
+  "교촌치킨": "https://www.kyochon.com",
+  "굽네치킨": "https://www.goobne.co.kr",
+  "처갓집양념치킨": "https://www.cheogajip.co.kr",
+  "페리카나": "https://www.pelicana.co.kr",
+  "멕시카나": "https://www.mexicana.co.kr",
+  "네네치킨": "https://nenechicken.com",
+  "호식이두마리치킨": "https://www.9922.co.kr",
+  "60계치킨": "https://www.60chicken.co.kr",
+  "노랑통닭": "https://www.norangtongdak.co.kr",
+  "자담치킨": "https://www.ejadam.co.kr",
+  "푸라닭": "https://puradakchicken.com",
+  "지코바치킨": "https://www.gcova.co.kr",
+  "가마치통닭": "https://www.gamachi.co.kr",
+  "맘스터치": "https://momstouch.co.kr",
+  "또래오래": "https://www.toreore.com",
+  "후라이드참잘하는집": "https://www.hoocham.com",
+  "바른치킨": "https://barunchicken.com",
+  "치킨마루": "http://chickenmaru.co.kr",
+  "땅땅치킨": "https://www.codd.co.kr",
+  "티바두마리치킨": "https://www.tiba.co.kr",
+  "순수치킨": "http://www.soonsoochicken.com",
+  "아웃닭": "http://outdark.co.kr",
+  "또봉이통닭": "https://www.ttobongee.com",
+  "가마로강정": "http://gamaro.co.kr",
+  "KFC": "https://www.kfckorea.com"
+};
 
-];
-
-// Flatten to single menu list for scoring
 function getDomainFromUrl(url) {
   if (!url) return '';
   const match = String(url).match(/^https?:\/\/([^/?#]+)/i);
@@ -304,293 +625,139 @@ function getDomainFromUrl(url) {
   return match[1].replace(/^www\./, '');
 }
 
-function hashSeed(text) {
-  return text.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-}
-
-function pickFromPool(pool, seedText) {
-  return pool[hashSeed(seedText) % pool.length];
-}
-
-function buildCommonsImageUrl(filename) {
-  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
-}
-
-const REAL_MENU_IMAGE_POOL = {
-  fried: [
-    buildCommonsImageUrl('Korean Fried Chicken.jpg'),
-    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
-    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
-    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
-    buildCommonsImageUrl('Korean fried chicken (409217776).jpg'),
-    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
-    buildCommonsImageUrl('Korean fried chicken (banban) (cropped).jpg')
-  ],
-  spicy: [
-    buildCommonsImageUrl('Korean fried chicken 7 dari.jpg'),
-    buildCommonsImageUrl('Korean fried chicken 5 padak.jpg'),
-    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
-    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
-    buildCommonsImageUrl('Buffalo_wings.jpg')
-  ],
-  saucy: [
-    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
-    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
-    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
-    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
-    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg')
-  ],
-  wing: [
-    buildCommonsImageUrl('Fried_Chicken_Wings_(54282490120).jpg'),
-    buildCommonsImageUrl('Fried_Chicken_Wings_(52769476180).jpg'),
-    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg'),
-    buildCommonsImageUrl('Buffalo_Wings.jpg')
-  ],
-  roast: [
-    buildCommonsImageUrl('Roast_Chicken.jpg'),
-    buildCommonsImageUrl('Roast_Chicken_(505826806).jpg'),
-    buildCommonsImageUrl('Roast_Chicken_(6987686841).jpg'),
-    buildCommonsImageUrl('Grilled_chicken.JPG'),
-    buildCommonsImageUrl('GRILLED_CHICKEN.jpg'),
-    buildCommonsImageUrl('Grilled_chickens.jpg')
-  ],
-  gizzard: [
-    buildCommonsImageUrl('Chicken_Gizzard.jpg')
-  ]
-};
-
-function buildBrandImageUrl(brand) {
-  const domain = getDomainFromUrl(brand.website || brand.logoPage || brand.menuPage);
-  if (!domain) return '';
+function buildBrandImageUrl(brandName) {
+  const url = BRAND_WEBSITES[brandName];
+  if (!url) return '';
+  const domain = getDomainFromUrl(url);
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
 }
 
-function buildMenuImageUrl(brand, menu) {
-  const id = menu.id || '';
-  const isRoastStyle = brand.group === 'Oven & Roasted'
-    || /roast|grilled|whole/i.test(menu.menu);
-  const isSpicy = (menu.spiciness_1to5 || 0) >= 4
-    || (menu.tags?.SweetSpicy || 0) >= 3
-    || /hot|volcano|red|spicy|ddaengcho/i.test(id);
-  const isSaucy = (menu.tags?.Saucy || 0) >= 2 || /seasoned|mayo|yangnyeom/i.test(id);
-
-  if (/gizzard/i.test(id)) return REAL_MENU_IMAGE_POOL.gizzard[0];
-  if (/wing/i.test(id)) return pickFromPool(REAL_MENU_IMAGE_POOL.wing, id);
-  if (isRoastStyle) return pickFromPool(REAL_MENU_IMAGE_POOL.roast, id);
-  if (isSpicy) return pickFromPool(REAL_MENU_IMAGE_POOL.spicy, id);
-  if (isSaucy) return pickFromPool(REAL_MENU_IMAGE_POOL.saucy, id);
-
-  return pickFromPool(REAL_MENU_IMAGE_POOL.fried, id);
-}
-
-const MENU_ITEMS = KCHICKEN_BRANDS.flatMap(b =>
-  b.menus.map(m => ({
-    id: m.id,
-    name: m.menu,
-    brand: b.brand,
-    group: b.group,
-    characteristics: m.characteristics,
-    spiciness: m.spiciness_1to5,
-    sweetness: m.sweetness_1to5,
-    texture: m.texture,
-    tags: m.tags,
-    image: buildMenuImageUrl(b, m),
-    fallbackImage: m.image,
-    brandImage: buildBrandImageUrl(b),
-    website: b.website,
-    logoPage: b.logoPage,
-    menuPage: b.menuPage,
-    crunchLevel: m.tags.Crunchy || 0,
-    heatLevel: m.spiciness_1to5,
-    sauceLevel: (m.tags.Saucy || 0) + (m.tags.LightSauce || 0)
-  }))
-);
-
-// Assign badges based on tags
-MENU_ITEMS.forEach(item => {
-  if (item.tags.Value >= 2) item.badge = 'Best Value';
-  else if (item.tags.LowMess >= 3) item.badge = 'Low Mess';
-  else if (item.tags.Crunchy >= 3) item.badge = 'Ultra Crunch';
-  else if (item.heatLevel >= 4) item.badge = 'Spicy';
-  else if (item.tags.CheesyCreamy >= 3) item.badge = 'Creamy';
-  else if (item.tags.Garlic >= 3) item.badge = 'Garlic Bomb';
-  else if (item.tags.SoyUmami >= 3) item.badge = 'Umami';
-  else item.badge = 'Top Pick';
+// Map raw data to the structure the app expects (flat list)
+const MENU_ITEMS = CHICKEN_RAW_DATA.map((item, index) => {
+  return {
+    id: `menu_${index}`,
+    name: item.menu_name,
+    brand: item.brand,
+    spiciness: item.spiciness,   // 1-5
+    crispiness: item.crispiness, // 1-5
+    composition: item.composition, // Array of strings
+    flavor_tags: item.flavor_tags, // Array of strings
+    description: item.description,
+    cooking_method: item.cooking_method,
+    // Add computed fields for UI compat
+    brandImage: buildBrandImageUrl(item.brand),
+    image: `https://placehold.co/400x300/E31837/FFFFFF?text=${encodeURIComponent(item.menu_name)}`,
+    fallbackImage: '',
+    website: BRAND_WEBSITES[item.brand] || '#',
+    menuPage: BRAND_WEBSITES[item.brand] ? `${BRAND_WEBSITES[item.brand]}/menu` : '#',
+    badge: determineBadge(item)
+  };
 });
 
-console.log(`Loaded ${KCHICKEN_BRANDS.length} brands with ${MENU_ITEMS.length} menu items`);
+function determineBadge(item) {
+  if (item.spiciness >= 4) return 'Spicy';
+  if (item.crispiness >= 5) return 'Extra Crispy';
+  if (item.flavor_tags.includes('가성비')) return 'Best Value';
+  return 'Top Pick';
+}
+
+console.log(`Loaded ${MENU_ITEMS.length} menu items from new dataset.`);
 
 const UI_STRINGS = {
   en: {
     startBtn: "Find My Chicken Match",
     heroHeadline: "Find your K-Chicken Soulmate 🍗",
-    heroSub: "Take the 2-minute quiz to discover which Korean chicken brand perfectly matches your taste profile.",
-    shareBtn: "Share",
-    shareSheetTitle: "Share your result",
-    shareSheetSubtitle: "Post your chicken flex on social.",
-    shareX: "Share on X",
-    shareFacebook: "Share on Facebook",
-    shareInstagram: "Share on Instagram",
-    shareCopy: "Copy caption",
-    shareCopied: "Copied to clipboard!",
-    shareInstagramCopied: "Caption copied. Paste it on Instagram.",
-    skipBtn: "Skip",
-    nextBtn: "Next",
-    backBtn: "Back",
+    heroSub: "Take the 30-second quiz to discover which Korean chicken brand perfectly matches your taste profile.",
     resultTitle: "Your Perfect Match",
-    viewMenu: "View Menu",
     matchScore: "Match",
-    crunch: "Crunch",
-    heat: "Heat",
-    mood: "Mood",
-    sauce: "Sauce",
-    reasonPlaceholder: "Perfect match for your taste profile.",
-    premiumBannerTitle: "Try Premium",
-    premiumBannerText: "First month free. Then $4.99/month.",
-    premiumBannerBtn: "Start Free Month"
+    spiciness: "Spiciness",
+    crispiness: "Crispiness",
+    flavor: "Flavor",
+    composition: "Cut",
+    nextBtn: "Next",
+    skipBtn: "Skip",
+    backBtn: "Back",
+    shareBtn: "Share",
+    unlockPremium: "Unlock Premium",
+    tryAgain: "Try another profile",
+    seeTopPicks: "See Today's Top Picks",
+    premiumUnlocks: "Premium Unlocks"
   },
   ko: {
     startBtn: "나의 치킨 찾기",
     heroHeadline: "나의 치킨 소울메이트 찾기 🍗",
-    heroSub: "2분 퀴즈로 당신의 입맛에 딱 맞는 치킨 브랜드를 찾아보세요.",
-    shareBtn: "공유하기",
-    shareSheetTitle: "결과 공유하기",
-    shareSheetSubtitle: "플랫폼을 골라 바로 자랑해보세요.",
-    shareX: "X에 공유",
-    shareFacebook: "페이스북 공유",
-    shareInstagram: "인스타그램 공유",
-    shareCopy: "문구 복사",
-    shareCopied: "클립보드에 복사했어요!",
-    shareInstagramCopied: "문구를 복사했어요. 인스타 캡션에 붙여넣어 주세요.",
-    skipBtn: "건너뛰기",
-    nextBtn: "다음",
-    backBtn: "이전",
+    heroSub: "30초 퀴즈로 당신의 입맛에 딱 맞는 치킨 브랜드를 찾아보세요.",
     resultTitle: "당신의 완벽한 매치",
-    viewMenu: "메뉴 보기",
     matchScore: "일치도",
-    crunch: "바삭함",
-    heat: "매운맛",
-    sauce: "소스량",
-    reasonPlaceholder: "당신의 취향에 딱 맞는 치킨입니다.",
-    premiumBannerTitle: "프리미엄 체험",
-    premiumBannerText: "첫 달 무료. 이후 월 $4.99.",
-    premiumBannerBtn: "무료 체험 시작"
+    spiciness: "매운맛",
+    crispiness: "바삭함",
+    flavor: "맛 특징",
+    composition: "부위 구성",
+    nextBtn: "다음",
+    skipBtn: "건너뛰기",
+    backBtn: "뒤로",
+    shareBtn: "공유하기",
+    unlockPremium: "프리미엄 잠금해제",
+    tryAgain: "다른 취향으로 다시하기",
+    seeTopPicks: "오늘의 추천 보기",
+    premiumUnlocks: "프리미엄 혜택"
   },
   zh: {
-    startBtn: "寻找我的炸鸡",
-    heroHeadline: "寻找你的炸鸡灵魂伴侣 🍗",
-    heroSub: "花2分钟测试，发现最适合你口味的韩式炸鸡品牌。",
-    shareBtn: "分享",
-    shareSheetTitle: "分享你的结果",
-    shareSheetSubtitle: "选择平台，一键分享。",
-    shareX: "分享到 X",
-    shareFacebook: "分享到 Facebook",
-    shareInstagram: "分享到 Instagram",
-    shareCopy: "复制文案",
-    shareCopied: "已复制到剪贴板！",
-    shareInstagramCopied: "文案已复制，请粘贴到 Instagram。",
-    skipBtn: "跳过",
-    nextBtn: "下一步",
-    backBtn: "返回",
+    startBtn: "寻找我的炸鸡伴侣",
+    heroHeadline: "寻找你的韩式炸鸡灵魂伴侣 🍗",
+    heroSub: "参加30秒的测试，发现最适合你口味的韩式炸鸡品牌。",
     resultTitle: "你的完美匹配",
-    viewMenu: "查看菜单",
     matchScore: "匹配度",
-    crunch: "酥脆度",
-    heat: "辣度",
-    sauce: "酱汁量",
-    reasonPlaceholder: "这是最适合你口味的炸鸡。",
-    premiumBannerTitle: "试用高级版",
-    premiumBannerText: "首月免费。之后每月$4.99。",
-    premiumBannerBtn: "开始免费试用"
+    spiciness: "辣度",
+    crispiness: "酥脆度",
+    flavor: "风味",
+    composition: "部位",
+    nextBtn: "下一步",
+    skipBtn: "跳过",
+    backBtn: "返回",
+    shareBtn: "分享",
+    unlockPremium: "解锁高级版",
+    tryAgain: "重试其他口味",
+    seeTopPicks: "查看今日推荐",
+    premiumUnlocks: "高级版福利"
   },
   ja: {
-    startBtn: "チキンを探す",
-    heroHeadline: "運命のチキンに出会う 🍗",
-    heroSub: "2分間のクイズで、あなたの味覚にぴったりの韓国チキンブランドを見つけましょう。",
-    shareBtn: "共有",
-    shareSheetTitle: "結果を共有",
-    shareSheetSubtitle: "SNSにそのまま投稿できます。",
-    shareX: "Xに共有",
-    shareFacebook: "Facebookに共有",
-    shareInstagram: "Instagramに共有",
-    shareCopy: "キャプションをコピー",
-    shareCopied: "クリップボードにコピーしました！",
-    shareInstagramCopied: "キャプションをコピーしました。Instagramに貼り付けてください。",
-    skipBtn: "スキップ",
-    nextBtn: "次へ",
-    backBtn: "戻る",
+    startBtn: "私のチキンを探す",
+    heroHeadline: "あなたのチキン・ソウルメイトを探そう 🍗",
+    heroSub: "30秒のクイズで、あなたの好みにぴったりの韓国チキンブランドを見つけましょう。",
     resultTitle: "あなたにぴったりのチキン",
-    viewMenu: "メニューを見る",
     matchScore: "マッチ度",
-    crunch: "サクサク感",
-    heat: "辛さ",
-    mood: "気分",
-    sauce: "ソースの量",
-    reasonPlaceholder: "あなたの好みにぴったりのチキンです。",
-    premiumBannerTitle: "プレミアムを試す",
-    premiumBannerText: "初月無料。その後月額$4.99。",
-    premiumBannerBtn: "無料体験を開始"
+    spiciness: "辛さ",
+    crispiness: "サクサク感",
+    flavor: "風味",
+    composition: "部位",
+    nextBtn: "次へ",
+    skipBtn: "スキップ",
+    backBtn: "戻る",
+    shareBtn: "共有",
+    unlockPremium: "プレミアムを解除",
+    tryAgain: "別の好みで試す",
+    seeTopPicks: "今日のおすすめを見る",
+    premiumUnlocks: "プレミアム特典"
   }
 };
 
+// Simplified translation object for the new quiz structure
 const QUIZ_TRANSLATIONS = {
-  crunch: {
-    title: {
-      en: "How crunchy do you want it?",
-      ko: "얼마나 바삭한 걸 원하시나요?",
-      zh: "你喜欢多脆的口感？",
-      ja: "どれくらいサクサクがいいですか？"
-    },
-    options: {
-      Ultra: { en: "Ultra crunchy", ko: "엄청 바삭하게", zh: "超级酥脆", ja: "超サクサク" },
-      Crispy: { en: "Crispy", ko: "적당히 바삭하게", zh: "酥脆", ja: "サクサク" },
-      Balanced: { en: "Balanced", ko: "밸런스 있게", zh: "平衡", ja: "バランスよく" },
-      Juicy: { en: "Soft & juicy", ko: "부드럽고 촉촉하게", zh: "软嫩多汁", ja: "しっとりジューシー" }
-    }
+  spiciness: {
+    title: { en: "How spicy?", ko: "매운 정도는?", zh: "有多辣？", ja: "辛さは？" },
+    options: {}
   },
-  heat: {
-    title: {
-      en: "How spicy can you handle today?",
-      ko: "오늘 얼마나 매운 게 땡기나요?",
-      zh: "今天想吃多辣？",
-      ja: "辛さはどれくらいがいいですか？"
-    },
-    options: {
-      None: { en: "No spice", ko: "안 매운 맛", zh: "不辣", ja: "辛くない" },
-      Mild: { en: "Mild", ko: "순한 맛", zh: "微辣", ja: "マイルド" },
-      Medium: { en: "Medium", ko: "적당히 매운 맛", zh: "中辣", ja: "中辛" },
-      Hot: { en: "Hot", ko: "매운 맛", zh: "很辣", ja: "辛口" },
-      Danger: { en: "Danger", ko: "아주 매운 맛 (위험!)", zh: "变态辣", ja: "激辛 (危険!)" }
-    }
+  crispiness: {
+    title: { en: "How crispy?", ko: "바삭함 정도는?", zh: "有多脆？", ja: "サクサク感は？" },
+    options: {}
   },
-  mood: {
-    title: {
-      en: "What flavor mood are you craving?",
-      ko: "어떤 맛이 땡기시나요?",
-      zh: "你想吃什么口味？",
-      ja: "どんな味が食べたいですか？"
-    },
-    options: {
-      Clean: { en: "Clean & salty", ko: "깔끔하고 짭짤한 맛", zh: "清淡咸香", ja: "さっぱり塩味" },
-      SweetSpicy: { en: "Sweet & spicy", ko: "매콤달콤 양념", zh: "甜辣", ja: "甘辛ヤンニョム" },
-      Garlic: { en: "Garlic & savory", ko: "마늘 & 감칠맛", zh: "蒜香", ja: "ニンニク風味" },
-      Soy: { en: "Soy & umami", ko: "간장 & 깊은 맛", zh: "酱油鲜香", ja: "醤油＆旨味" },
-      Cheesy: { en: "Cheesy & creamy", ko: "치즈 & 크리미", zh: "芝士奶香", ja: "チーズ＆クリーミー" },
-      Smoky: { en: "Smoky / peppery", ko: "훈제 / 후추향", zh: "烟熏/黑椒", ja: "スモーキー/ペッパー" }
-    }
+  composition: {
+    title: { en: "Preferred Cut?", ko: "선호하는 부위는?", zh: "喜欢的部位？", ja: "好みの部位は？" },
+    options: {}
   },
-  sauce: {
-    title: {
-      en: "Sauce or no sauce?",
-      ko: "소스는 어떻게 할까요?",
-      zh: "要加酱吗？",
-      ja: "ソースはどうしますか？"
-    },
-    options: {
-      NoSauce: { en: "No sauce (pure fried)", ko: "소스 없이 (후라이드)", zh: "不加酱 (原味炸鸡)", ja: "ソースなし (フライド)" },
-      Light: { en: "Light sauce", ko: "적게 (찍먹/살짝)", zh: "少酱", ja: "少なめ" },
-      Saucy: { en: "Saucy", ko: "넉넉하게 (양념)", zh: "多酱", ja: "たっぷり" },
-      Extra: { en: "Extra saucy", ko: "아주 넉넉하게", zh: "超多酱", ja: "超たっぷり" }
-    }
+  flavor: {
+    title: { en: "Preferred Flavor?", ko: "원하는 맛 특징은?", zh: "喜欢的口味？", ja: "好みの味は？" },
+    options: {}
   }
 };

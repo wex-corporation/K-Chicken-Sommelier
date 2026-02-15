@@ -31,11 +31,17 @@
 
       <section class="hero">
         <h1 class="hero-headline" id="hero-headline">Find your K-Chicken Soulmate 🍗</h1>
-        <p class="hero-sub" id="hero-sub">Take the 2-minute quiz to discover which Korean chicken brand perfectly
+        <p class="hero-sub" id="hero-sub">Take the 30-second quiz to discover which Korean chicken brand perfectly
           matches your taste profile.</p>
+        <!-- NEW: Data Stats -->
+        <p class="data-stats" id="data-stats" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+          <!-- Populated by JS -->
+        </p>
+
         <div class="hero-ctas">
           <button class="btn btn-primary" data-action="start-quiz" id="start-quiz-btn">Find My Chicken Match</button>
-          <button class="btn btn-secondary" data-navigate="results">See Today's Top Picks</button>
+          <button class="btn btn-secondary" data-navigate="results" id="btn-hero-secondary">See Today's Top
+            Picks</button>
         </div>
       </section>
 
@@ -119,7 +125,7 @@
           <button class="lang-btn" data-lang="zh">CN</button>
           <button class="lang-btn" data-lang="ja">JP</button>
         </div>
-        <button class="header-action" id="share-btn">Share</button>
+        <!-- Removed duplicate Share from header if needed, or keep. User asked for "SNS share button at the last" (Results page body) -->
       </header>
 
       <section class="section">
@@ -133,11 +139,18 @@
         <div id="match-cards">
           <!-- Match cards rendered by JS -->
         </div>
+
+        <!-- NEW: SNS Share Button Area -->
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn btn-secondary" id="btn-results-share" style="width: 100%; max-width: 300px;">
+            <span class="share-icon">🔗</span> <span id="share-btn-text">Share Results</span>
+          </button>
+        </div>
       </section>
 
       <!-- Locked Premium Section -->
       <div class="locked-section" id="locked-premium-section">
-        <div class="locked-section-title">Premium Unlocks</div>
+        <div class="locked-section-title" id="locked-section-title">Premium Unlocks</div>
         <div class="locked-item">Group Order Plan — Mix 2–6 tastes. No drama.</div>
         <div class="locked-item">Deal Finder — Best sets, faster.</div>
         <div class="locked-item">Full Pairing Report — Sides + drinks that just work.</div>
@@ -146,8 +159,8 @@
 
       <div class="bottom-bar">
         <div class="bottom-bar-buttons">
-          <button class="btn btn-primary" data-navigate="premium">Unlock Premium</button>
-          <button class="btn btn-secondary" data-action="start-quiz">Try another profile</button>
+          <button class="btn btn-primary" data-navigate="premium" id="btn-results-unlock">Unlock Premium</button>
+          <button class="btn btn-secondary" data-action="start-quiz" id="btn-results-retry">Try another profile</button>
         </div>
         <p class="pricing-note">First month free. Then $4.99/month. Cancel anytime.</p>
       </div>
