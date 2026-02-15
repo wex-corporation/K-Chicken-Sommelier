@@ -1,0 +1,1 @@
+K-Chicken Sommelier is a 30-second taste quiz that recommends your Top 3 Korean chicken brands and menus for tonight. It scores your preferences like Crunch, Heat, and Sweetness, then shows a personalized match you can share with friends. Your first month is free to try premium picks.
