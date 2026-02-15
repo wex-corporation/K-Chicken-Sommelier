@@ -257,10 +257,13 @@ function updateQuizButtons() {
         nextBtn.disabled = !hasAnswer;
 
         // Update button text for last question
+        const lang = state.language || 'en';
+        const strings = UI_STRINGS[lang] || UI_STRINGS['en'];
+
         if (state.currentQuestion === QUIZ_QUESTIONS.length - 1) {
-            nextBtn.textContent = 'Get My Matches';
+            nextBtn.textContent = (lang === 'ko' ? '결과 보기' : (lang === 'zh' ? '查看结果' : (lang === 'ja' ? '結果を見る' : 'Get Matches')));
         } else {
-            nextBtn.textContent = 'Next';
+            nextBtn.textContent = strings.nextBtn;
         }
     }
 }
