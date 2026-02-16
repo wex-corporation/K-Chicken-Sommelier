@@ -632,6 +632,96 @@ function buildBrandImageUrl(brandName) {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
 }
 
+// ========== WIKIMEDIA COMMONS IMAGE POOLS ==========
+// Restored from previous version (commit 06483dd)
+function buildCommonsImageUrl(filename) {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
+}
+
+function hashSeed(text) {
+  return text.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+function pickFromPool(pool, seedText) {
+  return pool[hashSeed(seedText) % pool.length];
+}
+
+const REAL_MENU_IMAGE_POOL = {
+  fried: [
+    buildCommonsImageUrl('Korean Fried Chicken.jpg'),
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Korean fried chicken (409217776).jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban) (cropped).jpg')
+  ],
+  spicy: [
+    buildCommonsImageUrl('Korean fried chicken 7 dari.jpg'),
+    buildCommonsImageUrl('Korean fried chicken 5 padak.jpg'),
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Buffalo_wings.jpg')
+  ],
+  saucy: [
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean fried chicken bbq.jpg'),
+    buildCommonsImageUrl('Korean fried chicken (banban).jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg')
+  ],
+  wing: [
+    buildCommonsImageUrl('Fried_Chicken_Wings_(54282490120).jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings_(52769476180).jpg'),
+    buildCommonsImageUrl('Fried_Chicken_Wings,_Oct_2025.jpg'),
+    buildCommonsImageUrl('Buffalo_Wings.jpg')
+  ],
+  roast: [
+    buildCommonsImageUrl('Roast_Chicken.jpg'),
+    buildCommonsImageUrl('Roast_Chicken_(505826806).jpg'),
+    buildCommonsImageUrl('Roast_Chicken_(6987686841).jpg'),
+    buildCommonsImageUrl('Grilled_chicken.JPG'),
+    buildCommonsImageUrl('GRILLED_CHICKEN.jpg'),
+    buildCommonsImageUrl('Grilled_chickens.jpg')
+  ],
+  gangjeong: [
+    buildCommonsImageUrl('Korean Yangnyeom chicken.jpg'),
+    buildCommonsImageUrl('Korean_fried_chicken_4.jpg')
+  ]
+};
+
+// Determine image category based on menu characteristics
+function buildMenuImageUrl(item) {
+  const name = item.menu_name || '';
+  const method = item.cooking_method || '';
+  const tags = item.flavor_tags || [];
+  const comp = item.composition || [];
+
+  // Roast / grilled / oven items
+  if (/오븐|구이|숯불/.test(method) || /구이/.test(name)) {
+    return pickFromPool(REAL_MENU_IMAGE_POOL.roast, name);
+  }
+  // Gangjeong (sweet-spicy glazed)
+  if (/강정/.test(name)) {
+    return pickFromPool(REAL_MENU_IMAGE_POOL.gangjeong, name);
+  }
+  // Wing-specific
+  if (comp.length === 1 && comp[0] === '윙봉') {
+    return pickFromPool(REAL_MENU_IMAGE_POOL.wing, name);
+  }
+  // Spicy items (spiciness >= 4)
+  if (item.spiciness >= 4) {
+    return pickFromPool(REAL_MENU_IMAGE_POOL.spicy, name);
+  }
+  // Saucy items (양념, 간장, 소스 based)
+  if (tags.some(t => ['달콤', '단짠', '크리미', '고추장', '느끼'].includes(t)) ||
+    /양념|간장|마요|소스/.test(name)) {
+    return pickFromPool(REAL_MENU_IMAGE_POOL.saucy, name);
+  }
+  // Default: fried
+  return pickFromPool(REAL_MENU_IMAGE_POOL.fried, name);
+}
+
 // Map raw data to the structure the app expects (flat list)
 const MENU_ITEMS = CHICKEN_RAW_DATA.map((item, index) => {
   return {
@@ -646,8 +736,8 @@ const MENU_ITEMS = CHICKEN_RAW_DATA.map((item, index) => {
     cooking_method: item.cooking_method,
     // Add computed fields for UI compat
     brandImage: buildBrandImageUrl(item.brand),
-    image: `https://placehold.co/400x300/E31837/FFFFFF?text=${encodeURIComponent(item.menu_name)}`,
-    fallbackImage: '',
+    image: buildMenuImageUrl(item),
+    fallbackImage: `https://placehold.co/400x300/E31837/FFFFFF?text=${encodeURIComponent(item.menu_name)}`,
     website: BRAND_WEBSITES[item.brand] || '#',
     menuPage: BRAND_WEBSITES[item.brand] ? `${BRAND_WEBSITES[item.brand]}/menu` : '#',
     badge: determineBadge(item)

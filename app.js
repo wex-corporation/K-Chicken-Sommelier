@@ -442,7 +442,7 @@ function renderMatchCards() {
         return `
     <div class="match-card">
       <div class="match-card-image" onclick="window.open('${item.menuPage}', '_blank')" style="cursor: pointer; overflow: hidden;">
-        <img class="match-card-photo" src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${displayName}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        <img class="match-card-photo" src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${displayName}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(this.dataset.fallback && this.src !== this.dataset.fallback) { this.src = this.dataset.fallback; }">
         <div class="match-card-badge">
           <span class="badge ${item.badge === 'Spicy' ? 'badge-spicy' : ''}">${badge}</span>
         </div>
