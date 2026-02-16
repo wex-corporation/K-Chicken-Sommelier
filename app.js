@@ -622,7 +622,7 @@ function getStrings() {
 // ========== SHARE ==========
 function buildShareText() {
     const lang = state.language || 'en';
-    const url = 'https://k-chicken-sommelier.com';
+    const url = 'https://k-chicken-sommelier.vercel.app';
 
     if (state.matches.length === 0) {
         const defaultMsg = lang === 'ko' ? '🍗 K-Chicken Sommelier에서 나의 치킨 소울메이트를 찾았어요!' :
@@ -778,7 +778,7 @@ async function copyToClipboard(text) {
 
 async function handleSharePlatform(platform) {
     const rawText = buildShareText();
-    const shareUrl = 'https://k-chicken-sommelier.com';
+    const shareUrl = 'https://k-chicken-sommelier.vercel.app';
     const hashtags = buildShareHashtags();
     const lang = state.language || 'en';
 
