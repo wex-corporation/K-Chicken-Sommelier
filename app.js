@@ -622,27 +622,63 @@ function getStrings() {
 // ========== SHARE ==========
 function buildShareText() {
     const lang = state.language || 'en';
+    const url = 'https://k-chicken-sommelier.com';
+
     if (state.matches.length === 0) {
-        return lang === 'ko' ? 'K-Chicken Sommelier에서 나의 치킨을 찾아보세요!' :
-            lang === 'zh' ? '在K-Chicken Sommelier找到你的炸鸡！' :
-                lang === 'ja' ? 'K-Chicken Sommelierであなたのチキンを見つけよう！' :
-                    'Find your perfect Korean chicken with K-Chicken Sommelier!';
+        const defaultMsg = lang === 'ko' ? '🍗 K-Chicken Sommelier에서 나의 치킨 소울메이트를 찾았어요!' :
+            '🍗 Found my Korean chicken soulmate with K-Chicken Sommelier!';
+        const hashtags = lang === 'ko'
+            ? '\n\n#KChickenSommelier #치킨추천 #한국치킨 #치킨소울메이트'
+            : '\n\n#KChickenSommelier #KoreanChicken #ChickenSoulmate';
+        return `${defaultMsg}${hashtags}\n${url}`;
     }
+
     const top = state.matches[0];
-    const itemName = getTranslatedName(top, lang);
-    const header = lang === 'ko' ? `🍗 나의 치킨 소울메이트: ${itemName} (${top.brand})` :
-        lang === 'zh' ? `🍗 我的炸鸡灵魂伴侣: ${itemName} (${top.brand})` :
-            lang === 'ja' ? `🍗 私のチキンソウルメイト: ${itemName} (${top.brand})` :
-                `🍗 My Chicken Soulmate: ${itemName} (${top.brand})`;
-    const score = lang === 'ko' ? `매치 점수: ${top.score}점` :
-        lang === 'zh' ? `匹配分数: ${top.score}` :
-            lang === 'ja' ? `マッチ度: ${top.score}` :
-                `Match Score: ${top.score}`;
-    const cta = lang === 'ko' ? '나도 해보기 →' :
-        lang === 'zh' ? '我也试试 →' :
-            lang === 'ja' ? '私もやってみる →' :
-                'Try it yourself →';
-    return `${header}\n${score}\n\n${cta}\nhttps://k-chicken-sommelier.com`;
+    const koName = top.name;
+    const displayName = getTranslatedName(top, lang);
+    const tags = getTranslatedTags(top, lang).slice(0, 3).join(', ');
+    const badge = getTranslatedBadge(top.badge, lang);
+
+    let text, hashtags;
+    if (lang === 'ko') {
+        text = `🍗 나의 치킨 소울메이트를 찾았어요!\n\n` +
+            `✅ ${koName} — ${top.brand}\n` +
+            `🏷️ ${badge} | 매치 점수 ${top.score}점\n` +
+            `🔥 ${tags}\n\n` +
+            `30초 퀴즈로 나만의 치킨을 찾아보세요!`;
+        hashtags = '\n\n#KChickenSommelier #치킨추천 #한국치킨 #치킨소울메이트 #' + koName.replace(/\s/g, '');
+    } else if (lang === 'zh') {
+        text = `🍗 找到了我的炸鸡灵魂伴侣！\n\n` +
+            `✅ ${displayName} — ${top.brand}\n` +
+            `🏷️ ${badge} | 匹配度 ${top.score}\n` +
+            `🔥 ${tags}\n\n` +
+            `30秒测试找到你的专属炸鸡！`;
+        hashtags = '\n\n#KChickenSommelier #韩国炸鸡 #炸鸡推荐';
+    } else if (lang === 'ja') {
+        text = `🍗 チキンソウルメイトを見つけました！\n\n` +
+            `✅ ${displayName} — ${top.brand}\n` +
+            `🏷️ ${badge} | マッチ度 ${top.score}\n` +
+            `🔥 ${tags}\n\n` +
+            `30秒クイズであなたのチキンを見つけよう！`;
+        hashtags = '\n\n#KChickenSommelier #韓国チキン #チキンおすすめ';
+    } else {
+        text = `🍗 Found my Korean chicken soulmate!\n\n` +
+            `✅ ${displayName} — ${top.brand}\n` +
+            `🏷️ ${badge} | Match Score: ${top.score}\n` +
+            `🔥 ${tags}\n\n` +
+            `Take the 30-sec quiz to find yours!`;
+        hashtags = '\n\n#KChickenSommelier #KoreanChicken #ChickenSoulmate #KFood';
+    }
+
+    return `${text}${hashtags}\n${url}`;
+}
+
+function buildShareHashtags() {
+    const lang = state.language || 'en';
+    if (lang === 'ko') return 'KChickenSommelier,치킨추천,한국치킨,치킨소울메이트';
+    if (lang === 'zh') return 'KChickenSommelier,韩国炸鸡,炸鸡推荐';
+    if (lang === 'ja') return 'KChickenSommelier,韓国チキン,チキンおすすめ';
+    return 'KChickenSommelier,KoreanChicken,ChickenSoulmate,KFood';
 }
 
 function showToast(message) {
@@ -662,56 +698,22 @@ function showToast(message) {
 }
 
 function initShare() {
-    // Results page share button — primary share action
+    // Results page share button — opens share modal
     const resShare = document.getElementById('btn-results-share');
     if (resShare) {
-        resShare.addEventListener('click', async () => {
-            const shareText = buildShareText();
-            const lang = state.language || 'en';
-
-            // Try Web Share API first (mobile browsers)
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'K-Chicken Sommelier',
-                        text: shareText,
-                        url: 'https://k-chicken-sommelier.com'
-                    });
-                    return;
-                } catch (e) {
-                    if (e.name === 'AbortError') return; // user cancelled
-                }
-            }
-
-            // Fallback: copy to clipboard
-            try {
-                await navigator.clipboard.writeText(shareText);
-                const msg = lang === 'ko' ? '📋 결과가 클립보드에 복사되었습니다!' :
-                    lang === 'zh' ? '📋 结果已复制到剪贴板！' :
-                        lang === 'ja' ? '📋 結果がクリップボードにコピーされました！' :
-                            '📋 Results copied to clipboard!';
-                showToast(msg);
-            } catch (e) {
-                // Last resort: select+copy with textarea
-                const ta = document.createElement('textarea');
-                ta.value = shareText;
-                ta.style.cssText = 'position:fixed;opacity:0';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                ta.remove();
-                const msg = lang === 'ko' ? '📋 복사 완료!' :
-                    lang === 'zh' ? '📋 已复制！' :
-                        lang === 'ja' ? '📋 コピーしました！' :
-                            '📋 Copied!';
-                showToast(msg);
-            }
+        resShare.addEventListener('click', () => {
+            openShareModal();
         });
     }
 
+    // Close handlers
     document.querySelectorAll('[data-share-close]').forEach(el => {
         el.addEventListener('click', closeShareModal);
     });
+    const closeBtn = document.getElementById('share-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeShareModal);
+    }
 
     // Platform buttons in share modal
     document.querySelectorAll('[data-share-platform]').forEach(btn => {
@@ -723,10 +725,33 @@ function initShare() {
 
 function openShareModal() {
     const modal = document.getElementById('share-modal');
-    if (modal) {
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden', 'false');
+    if (!modal) return;
+
+    // Populate preview text
+    const preview = document.getElementById('share-preview-text');
+    if (preview) {
+        preview.textContent = buildShareText();
     }
+
+    // Set title/subtitle based on language
+    const lang = state.language || 'en';
+    const title = document.getElementById('share-sheet-title');
+    const subtitle = document.getElementById('share-sheet-subtitle');
+    if (title) {
+        title.textContent = lang === 'ko' ? '결과 공유하기' :
+            lang === 'zh' ? '分享结果' :
+                lang === 'ja' ? '結果をシェア' :
+                    'Share your result';
+    }
+    if (subtitle) {
+        subtitle.textContent = lang === 'ko' ? 'SNS에 자랑해보세요! 멘트와 해시태그가 자동 입력됩니다.' :
+            lang === 'zh' ? '在社交媒体上分享！文字和标签已自动生成。' :
+                lang === 'ja' ? 'SNSでシェアしよう！テキストとハッシュタグは自動入力されます。' :
+                    'Share on social media! Text and hashtags are auto-generated.';
+    }
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
 }
 
 function closeShareModal() {
@@ -737,29 +762,63 @@ function closeShareModal() {
     }
 }
 
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+    }
+}
+
 async function handleSharePlatform(platform) {
-    const shareText = encodeURIComponent(buildShareText());
-    const shareUrl = encodeURIComponent('https://k-chicken-sommelier.com');
+    const rawText = buildShareText();
+    const shareUrl = 'https://k-chicken-sommelier.com';
+    const hashtags = buildShareHashtags();
+    const lang = state.language || 'en';
+
+    // Build a short text for Twitter (character limit)
+    const top = state.matches.length > 0 ? state.matches[0] : null;
+    const tweetText = top
+        ? (lang === 'ko'
+            ? `🍗 나의 치킨 소울메이트: ${top.name} (${top.brand}) — 매치 ${top.score}점!\n30초 퀴즈로 나만의 치킨을 찾아보세요!`
+            : `🍗 My chicken soulmate: ${getTranslatedName(top, lang)} (${top.brand}) — Match ${top.score}!\nFind yours with the 30-sec quiz!`)
+        : (lang === 'ko' ? '🍗 K-Chicken Sommelier에서 치킨 소울메이트를 찾아보세요!' : '🍗 Find your Korean chicken soulmate!');
 
     switch (platform) {
         case 'x':
-            window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
+            window.open(
+                `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${hashtags}`,
+                '_blank'
+            );
             break;
         case 'facebook':
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareText}`, '_blank');
+            window.open(
+                `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(rawText)}`,
+                '_blank'
+            );
             break;
         case 'instagram':
-            // Instagram doesn't have a share URL — copy and notify
-            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
-            showToast(state.language === 'ko' ? '📋 인스타그램에 붙여넣기 하세요!' : '📋 Paste this on Instagram!');
+            // Instagram has no web share URL — copy text to clipboard
+            await copyToClipboard(rawText);
+            showToast(lang === 'ko'
+                ? '📋 텍스트가 복사되었습니다! 인스타그램에 붙여넣기 하세요.'
+                : lang === 'zh' ? '📋 文字已复制！请粘贴到Instagram。'
+                    : lang === 'ja' ? '📋 テキストをコピーしました！Instagramに貼り付けてください。'
+                        : '📋 Text copied! Paste it on Instagram.');
             break;
         case 'copy':
-            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
-            showToast(state.language === 'ko' ? '📋 복사 완료!' : '📋 Copied!');
+            await copyToClipboard(rawText);
+            showToast(lang === 'ko' ? '📋 링크와 텍스트가 복사되었습니다!' :
+                lang === 'zh' ? '📋 链接和文字已复制！' :
+                    lang === 'ja' ? '📋 リンクとテキストがコピーされました！' :
+                        '📋 Link and text copied!');
             break;
-        default:
-            try { await navigator.clipboard.writeText(decodeURIComponent(shareText)); } catch (e) { }
-            showToast('📋 Copied!');
     }
     closeShareModal();
 }

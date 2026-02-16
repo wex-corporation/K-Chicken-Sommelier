@@ -329,13 +329,25 @@
     <div class="share-modal-panel" role="dialog" aria-modal="true" aria-labelledby="share-sheet-title">
       <button class="share-modal-close" id="share-close-btn" aria-label="Close">✕</button>
       <h3 class="share-modal-title" id="share-sheet-title">Share your result</h3>
-      <p class="share-modal-subtitle" id="share-sheet-subtitle">Post your chicken flex on social.</p>
+      <p class="share-modal-subtitle" id="share-sheet-subtitle">Text and hashtags are auto-generated.</p>
       <div class="share-preview" id="share-preview-text"></div>
       <div class="share-grid">
-        <button class="share-option share-option-x" data-share-platform="x">X</button>
-        <button class="share-option share-option-facebook" data-share-platform="facebook">Facebook</button>
-        <button class="share-option share-option-instagram" data-share-platform="instagram">Instagram</button>
-        <button class="share-option share-option-copy" data-share-platform="copy">Copy</button>
+        <button class="share-option share-option-x" data-share-platform="x">
+          <span class="share-option-icon">𝕏</span>
+          <span class="share-option-label">X (Twitter)</span>
+        </button>
+        <button class="share-option share-option-facebook" data-share-platform="facebook">
+          <span class="share-option-icon">📘</span>
+          <span class="share-option-label">Facebook</span>
+        </button>
+        <button class="share-option share-option-instagram" data-share-platform="instagram">
+          <span class="share-option-icon">📷</span>
+          <span class="share-option-label">Instagram</span>
+        </button>
+        <button class="share-option share-option-copy" data-share-platform="copy">
+          <span class="share-option-icon">🔗</span>
+          <span class="share-option-label">Copy Link</span>
+        </button>
       </div>
       <div class="share-status" id="share-status"></div>
     </div>
