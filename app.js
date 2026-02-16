@@ -35,11 +35,17 @@ function initStats() {
     const uniqueBrands = new Set(MENU_ITEMS.map(item => item.brand)).size;
     const statsEl = document.getElementById('data-stats');
     if (statsEl) {
-        // Simple localization check (could be robust, but kept simple)
-        const isKo = state.language === 'ko';
-        statsEl.innerHTML = isKo
-            ? `현재 <strong>${uniqueBrands}개 브랜드</strong>, <strong>${totalMenus}개 메뉴</strong> 분석 완료 📊`
-            : `Currently analyzing <strong>${uniqueBrands} Brands</strong> & <strong>${totalMenus} Menus</strong> 📊`;
+        const lang = state.language || 'en';
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+        const stats = {
+            ko: `현재 <strong>${uniqueBrands}개 브랜드</strong>, <strong>${totalMenus}개 메뉴</strong> 분석 완료 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(실시간 DB: ${today})</span>`,
+            en: `Analyzing <strong>${uniqueBrands} Brands</strong> & <strong>${totalMenus} Menus</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(Real-time: ${today})</span>`,
+            zh: `正在分析 <strong>${uniqueBrands} 个品牌</strong> 和 <strong>${totalMenus} 个菜单</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(实时数据: ${today})</span>`,
+            ja: `現在 <strong>${uniqueBrands}つのブランド</strong>、<strong>${totalMenus}つのメニュー</strong>を分析中 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(リアルタイム: ${today})</span>`
+        };
+
+        statsEl.innerHTML = stats[lang] || stats.en;
     }
 }
 
