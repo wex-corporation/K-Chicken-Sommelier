@@ -25,27 +25,25 @@ document.addEventListener('DOMContentLoaded', () => {
     initLanguages();
     initShare();
     initStats();      // New
+    initBrandTicker(); // New
     initGoogleLogin(); // New
     showPage('home');
 });
 
 // ========== NEW FEATURES ==========
 function initStats() {
+    const lang = state.language || 'en';
+    const strings = UI_STRINGS[lang] || UI_STRINGS.en;
     const totalMenus = MENU_ITEMS.length;
     const uniqueBrands = new Set(MENU_ITEMS.map(item => item.brand)).size;
     const statsEl = document.getElementById('data-stats');
     if (statsEl) {
-        const lang = state.language || 'en';
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
-        const stats = {
-            ko: `현재 <strong>${uniqueBrands}개 브랜드</strong>, <strong>${totalMenus}개 메뉴</strong> 분석 완료 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(실시간 DB: ${today})</span>`,
-            en: `Analyzing <strong>${uniqueBrands} Brands</strong> & <strong>${totalMenus} Menus</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(Real-time: ${today})</span>`,
-            zh: `正在分析 <strong>${uniqueBrands} 个品牌</strong> 和 <strong>${totalMenus} 个菜单</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(实时数据: ${today})</span>`,
-            ja: `現在 <strong>${uniqueBrands}つのブランド</strong>、<strong>${totalMenus}つのメニュー</strong>を分析中 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(リアルタイム: ${today})</span>`
-        };
-
-        statsEl.innerHTML = stats[lang] || stats.en;
+        const today = new Date().toISOString().split('T')[0];
+        let text = (strings.statsTemplate || "Analyzing <strong>{brands} Brands</strong> & <strong>{menus} Menus</strong>")
+            .replace('{brands}', uniqueBrands)
+            .replace('{menus}', totalMenus)
+            .replace('{today}', today);
+        statsEl.innerHTML = text;
     }
 }
 
@@ -140,14 +138,24 @@ function renderQuizQuestion() {
     const progressFill = document.querySelector('.progress-fill');
     const progressText = document.querySelector('.progress-text');
     const lang = state.language || 'en';
+    const strings = UI_STRINGS[lang] || UI_STRINGS.en;
 
     // Update progress
     if (progressText) {
-        progressText.textContent = `Question ${state.currentQuestion + 1} of ${QUIZ_QUESTIONS.length}`;
+        let pText = (strings.questionProgress || 'Question {curr} of {total}')
+            .replace('{curr}', state.currentQuestion + 1)
+            .replace('{total}', QUIZ_QUESTIONS.length);
+        progressText.textContent = pText;
     }
     if (progressFill) {
         const progress = ((state.currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
         progressFill.style.width = `${progress}%`;
+    }
+
+    // Localize back button
+    const backBtnText = document.getElementById('back-btn-text');
+    if (backBtnText) {
+        backBtnText.textContent = strings.backBtn || 'Back';
     }
 
     // Get translations
@@ -386,6 +394,12 @@ function renderResults() {
 }
 
 // ========== Translation Helpers ==========
+function getTranslatedBrand(brand, lang) {
+    if (lang === 'ko') return brand;
+    const t = BRAND_TRANSLATIONS[brand];
+    return (t && t[lang]) ? t[lang] : brand;
+}
+
 function getTranslatedName(item, lang) {
     const koName = item.name; // always Korean from raw data
     if (lang === 'ko') return koName;
@@ -458,8 +472,8 @@ function renderMatchCards() {
           <div class="match-card-meta" onclick="window.open('${item.website}', '_blank')">
             <div class="match-card-name">${nameDisplay} <span style="font-size: 12px; vertical-align: middle;">🔗</span></div>
             <div class="match-card-brand-row">
-              ${item.brandImage ? `<img class="match-card-brand-logo" src="${item.brandImage}" alt="${item.brand} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
-              <div class="match-card-brand">${item.brand}</div>
+              ${item.brandImage ? `<img class="match-card-brand-logo" src="${item.brandImage}" alt="${getTranslatedBrand(item.brand, lang)} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
+              <div class="match-card-brand">${getTranslatedBrand(item.brand, lang)}</div>
             </div>
           </div>
           <div class="match-card-score">
@@ -555,21 +569,76 @@ function initSettings() {
 }
 
 function renderSettings() {
-    // Simplified settings render
+    const lang = state.language || 'en';
+    const strings = getStrings();
+    const noPicks = strings.noAccount || "No picks yet."; // fallback
+
     const historyList = document.getElementById('history-list');
     if (historyList) {
         if (state.history.length === 0) {
-            historyList.innerHTML = '<p class="text-muted">No picks yet.</p>';
+            historyList.innerHTML = `<p class="text-muted">${noPicks}</p>`;
         } else {
-            historyList.innerHTML = state.history.slice(0, 5).map(item => `
+            historyList.innerHTML = state.history.slice(0, 5).map(item => {
+                const displayName = getTranslatedName({ name: item.name }, lang);
+                const displayBrand = getTranslatedBrand(item.brand || '', lang);
+                return `
         <div class="history-item">
           <div>
-            <div class="history-name">${item.name}</div>
+            <div class="history-name">${displayName} (${displayBrand})</div>
             <div class="history-date">${item.date}</div>
           </div>
         </div>
-      `).join('');
+      `;
+            }).join('');
         }
+    }
+    renderProfileChips();
+}
+
+function renderProfileChips() {
+    const container = document.getElementById('settings-profile-chips');
+    if (!container) return;
+
+    const lang = state.language || 'en';
+    const chips = [];
+
+    if (!state.answers) return;
+
+    // Spiciness
+    if (state.answers.spiciness) {
+        const val = state.answers.spiciness;
+        const text = (QUIZ_TRANSLATIONS.spiciness.options[val] && QUIZ_TRANSLATIONS.spiciness.options[val][lang])
+            ? QUIZ_TRANSLATIONS.spiciness.options[val][lang] : `Spicy ${val}`;
+        chips.push(`<span class="profile-chip">${text}</span>`);
+    }
+    // Crispiness
+    if (state.answers.crispiness) {
+        const val = state.answers.crispiness;
+        const text = (QUIZ_TRANSLATIONS.crispiness.options[val] && QUIZ_TRANSLATIONS.crispiness.options[val][lang])
+            ? QUIZ_TRANSLATIONS.crispiness.options[val][lang] : `Crispy ${val}`;
+        chips.push(`<span class="profile-chip">${text}</span>`);
+    }
+    // Composition
+    if (state.answers.composition && state.answers.composition !== 'any') {
+        const val = state.answers.composition;
+        const text = (QUIZ_TRANSLATIONS.composition.options[val] && QUIZ_TRANSLATIONS.composition.options[val][lang])
+            ? QUIZ_TRANSLATIONS.composition.options[val][lang] : val;
+        chips.push(`<span class="profile-chip">${text}</span>`);
+    }
+    // Flavor
+    if (state.answers.flavor && state.answers.flavor.length > 0) {
+        state.answers.flavor.forEach(f => {
+            const text = (QUIZ_TRANSLATIONS.flavor.options[f] && QUIZ_TRANSLATIONS.flavor.options[f][lang])
+                ? QUIZ_TRANSLATIONS.flavor.options[f][lang] : f;
+            chips.push(`<span class="profile-chip">${text}</span>`);
+        });
+    }
+
+    if (chips.length === 0) {
+        const strings = getStrings();
+        container.innerHTML = `<p class="text-muted" style="grid-column: 1/-1;">${strings.noAccount || "No profile yet"}</p>`;
+    } else {
+        container.innerHTML = chips.join('');
     }
 }
 
@@ -590,6 +659,7 @@ function addToHistory() {
         state.history.unshift({
             name: topMatch.name,
             score: topMatch.score,
+            brand: topMatch.brand,
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         });
         state.history = state.history.slice(0, 10);
@@ -614,6 +684,7 @@ function loadState() {
             state.userProfile = data.userProfile || null;
             state.history = data.history || [];
             state.isPremium = data.isPremium || false;
+            state.answers = data.answers || { spiciness: 3, crispiness: 3, composition: 'any', flavor: [] };
         }
     } catch (e) {
         console.error('Failed to load state:', e);
@@ -850,14 +921,45 @@ function applyTranslations(lang) {
     update('back-btn-text', strings.backBtn);
 
     // Results Page Buttons
-    update('results-title', strings.resultTitle);
-    update('share-btn-text', strings.shareBtn);
-    update('btn-results-unlock', strings.unlockPremium);
-    update('btn-results-retry', strings.tryAgain);
-    update('locked-section-title', strings.premiumUnlocks);
+    update('results-title', strings.resultsTitle || 'Your Perfect Match');
+    update('share-btn-text', strings.shareBtn || 'Share');
+    update('btn-results-unlock', strings.unlockPremium || 'Unlock Premium');
+    update('btn-results-retry', strings.tryAgain || 'Try another profile');
 
-    // Recalculate stats text in new language
-    initStats();
+    // Locked items
+    update('locked-section-title', strings.lockedTitle || 'Premium Unlocks');
+    const lockedList = document.getElementById('locked-premium-section');
+    if (lockedList) {
+        const items = lockedList.querySelectorAll('.locked-item');
+        if (items.length >= 4) {
+            items[0].textContent = strings.lockedItem1 || items[0].textContent;
+            items[1].textContent = strings.lockedItem2 || items[1].textContent;
+            items[2].textContent = strings.lockedItem3 || items[2].textContent;
+            items[3].textContent = strings.lockedItem4 || items[3].textContent;
+        }
+    }
+
+    // Premium Page
+    const premiumHeroTitle = document.querySelector('.premium-headline');
+    if (premiumHeroTitle) premiumHeroTitle.textContent = strings.premiumHeroTitle || 'Go Full Sommelier';
+    const premiumHeroSub = document.querySelector('.premium-sub');
+    if (premiumHeroSub) premiumHeroSub.textContent = strings.premiumHeroSub || 'Start free for 1 month. Upgrade your orders instantly.';
+
+    const featureItems = document.querySelectorAll('.feature-item .feature-text');
+    if (featureItems.length >= 5) {
+        featureItems[0].textContent = strings.feature1 || 'Group Order Mode';
+        featureItems[1].textContent = strings.feature2 || 'Deal Finder';
+        featureItems[2].textContent = strings.feature3 || 'Full Pairing Report';
+        featureItems[3].textContent = strings.feature4 || 'Regret Radar';
+        featureItems[4].textContent = strings.feature5 || 'Taste History';
+    }
+
+    const pricingNotes = document.querySelectorAll('.pricing-note');
+    pricingNotes.forEach(note => {
+        note.textContent = strings.pricingNote || 'First month free. Then $4.99/month. Cancel anytime.';
+    });
+
+    if (state.currentPage === 'home') initStats();
 
     // Re-render quiz if active
     if (state.currentPage === 'quiz') {
@@ -890,4 +992,23 @@ function setLanguage(lang) {
 
     applyTranslations(lang);
     saveState();
+}
+function initBrandTicker() {
+    const track = document.getElementById('brand-ticker-track');
+    if (track) {
+        const brands = [...new Set(MENU_ITEMS.map(item => item.brand))];
+        const lang = state.language || 'en';
+
+        // Double them for seamless loop
+        const tickerBrands = [...brands, ...brands];
+
+        track.innerHTML = tickerBrands.map(brand => {
+            return `
+                <div class="ticker-item">
+                    <div class="ticker-logo" style="display:grid;place-items:center;font-size:12px;">🍗</div>
+                    <span class="ticker-name">${getTranslatedBrand(brand, lang)}</span>
+                </div>
+            `;
+        }).join('');
+    }
 }

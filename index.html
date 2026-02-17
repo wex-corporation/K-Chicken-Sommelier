@@ -46,18 +46,28 @@
       </header>
 
       <section class="hero">
-        <h1 class="hero-headline" id="hero-headline">Find your K-Chicken Soulmate 🍗</h1>
-        <p class="hero-sub" id="hero-sub">Take the 30-second quiz to discover which Korean chicken brand perfectly
-          matches your taste profile.</p>
-        <!-- NEW: Data Stats -->
-        <p class="data-stats" id="data-stats" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-          <!-- Populated by JS -->
-        </p>
+        <h1 class="hero-headline" id="hero-headline">Professional K-Chicken Selection, Powered by Data 🍗</h1>
+        <p class="hero-sub" id="hero-sub">Expertly matching your palate with the top 12+ premium brands using our
+          sensory algorithm.</p>
+
+        <!-- NEW: Authority Badge -->
+        <div class="conversion-trust-badge"
+          style="margin-bottom: var(--space-lg); display: inline-flex; align-items: center; gap: 8px; border-left: 3px solid var(--primary-red); padding: 4px 12px; background: var(--bg-secondary);">
+          <span style="font-size: 1.1rem;">⚖️</span>
+          <span
+            style="font-size: var(--font-sm); font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Algorithm
+            Verified • Expert Choice</span>
+        </div>
 
         <div class="hero-ctas">
-          <button class="btn btn-primary" data-action="start-quiz" id="start-quiz-btn">Find My Chicken Match</button>
-          <button class="btn btn-secondary" data-navigate="results" id="btn-hero-secondary">See Today's Top
-            Picks</button>
+          <button class="btn btn-primary" data-action="start-quiz" id="start-quiz-btn">Begin Expert
+            Consultation</button>
+          <button class="btn btn-secondary" data-navigate="results" id="btn-hero-secondary">Explore Brand
+            Portfolio</button>
+        </div>
+
+        <div id="data-stats" class="data-stats" style="margin-top: var(--space-lg); min-height: 24px;">
+          <!-- Rendered by JS -->
         </div>
       </section>
 
@@ -78,6 +88,15 @@
             <span class="badge">Best Value</span>
             <div class="teaser-card-title">bhc 뿌링클</div>
             <div class="teaser-card-sub">bhc</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Brand Ticker Section -->
+      <section class="brand-ticker-section">
+        <div class="brand-ticker" id="brand-ticker">
+          <div class="brand-ticker-track" id="brand-ticker-track">
+            <!-- Rendered by JS -->
           </div>
         </div>
       </section>

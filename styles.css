@@ -259,26 +259,82 @@ body {
   width: 100%;
   height: 48px;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--primary-red);
   font-size: var(--font-base);
-  border: 2px solid var(--border-medium);
+  border: 2px solid var(--primary-red);
   border-radius: var(--radius-md);
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-primary);
-  background: var(--bg-secondary);
+  background: var(--primary-red-light);
+  border-color: var(--primary-red-hover);
+  color: var(--primary-red-hover);
 }
 
-.btn-text {
-  background: none;
-  color: var(--text-secondary);
+/* ========== STATS ========== */
+.data-stats {
+  text-align: center;
   font-size: var(--font-sm);
-  padding: var(--space-sm) var(--space-md);
+  color: var(--text-secondary);
 }
 
-.btn-text:hover {
-  color: var(--text-primary);
+.data-stats strong {
+  color: var(--primary-red);
+}
+
+/* ========== BRAND TICKER ========== */
+.brand-ticker-section {
+  padding: var(--space-xl) 0;
+  background: var(--bg-secondary);
+  overflow: hidden;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.brand-ticker {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.brand-ticker-track {
+  display: flex;
+  gap: var(--space-xl);
+  width: max-content;
+  animation: scroll 30s linear infinite;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  white-space: nowrap;
+}
+
+.ticker-logo {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+}
+
+.ticker-name {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* ========== BADGES ========== */
