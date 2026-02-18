@@ -20,7 +20,6 @@ const BRAND_SHEET_ID = '1CGhr6ETMKV3VTC_62Y-8hRgqt9KQQ-VXSnBQsdTkTnM';
 const BRAND_SHEET_JSON_URL = `https://opensheet.elk.sh/${BRAND_SHEET_ID}/1`;
 const BRAND_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${BRAND_SHEET_ID}/gviz/tq?tqx=out:csv`;
 const BRAND_SHEET_CACHE_KEY = 'kcs-brand-sheet-cache-v1';
-const BRAND_SHEET_CACHE_TTL_MS = 1000 * 60 * 60 * 6;
 
 const BRAND_MATCH_ALIASES = {
     BHC: ['비에이치씨(BHC)', '비에이치씨'],
@@ -142,7 +141,9 @@ function mapSheetRows(rawRows) {
 }
 
 async function fetchBrandSheetFromJson() {
-    const response = await fetch(BRAND_SHEET_JSON_URL);
+    const response = await fetch(`${BRAND_SHEET_JSON_URL}?_ts=${Date.now()}`, {
+        cache: 'no-store'
+    });
     if (!response.ok) throw new Error(`Brand sheet JSON fetch failed: ${response.status}`);
 
     const jsonRows = await response.json();
@@ -158,7 +159,9 @@ async function fetchBrandSheetFromJson() {
 }
 
 async function fetchBrandSheetFromCsv() {
-    const response = await fetch(BRAND_SHEET_CSV_URL);
+    const response = await fetch(`${BRAND_SHEET_CSV_URL}&_ts=${Date.now()}`, {
+        cache: 'no-store'
+    });
     if (!response.ok) throw new Error(`Brand sheet CSV fetch failed: ${response.status}`);
 
     const csvText = await response.text();
@@ -212,11 +215,6 @@ function saveBrandSheetCache(rows, source) {
 
 async function loadBrandSheetRows() {
     const cached = loadBrandSheetCache();
-    const isCacheValid = cached && Date.now() - cached.fetchedAt < BRAND_SHEET_CACHE_TTL_MS;
-
-    if (isCacheValid) {
-        return { rows: cached.rows, source: cached.source || 'cache', fetchedAt: cached.fetchedAt };
-    }
 
     try {
         const jsonResult = await fetchBrandSheetFromJson();
