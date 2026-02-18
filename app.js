@@ -11,7 +11,23 @@ const state = {
     userProfile: null,
     matches: [],
     isPremium: false,
-    history: []
+    history: [],
+    brandDirectory: [],
+    brandSheetMeta: null
+};
+
+const BRAND_SHEET_ID = '1CGhr6ETMKV3VTC_62Y-8hRgqt9KQQ-VXSnBQsdTkTnM';
+const BRAND_SHEET_JSON_URL = `https://opensheet.elk.sh/${BRAND_SHEET_ID}/1`;
+const BRAND_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${BRAND_SHEET_ID}/gviz/tq?tqx=out:csv`;
+const BRAND_SHEET_CACHE_KEY = 'kcs-brand-sheet-cache-v1';
+const BRAND_SHEET_CACHE_TTL_MS = 1000 * 60 * 60 * 6;
+
+const BRAND_MATCH_ALIASES = {
+    BHC: ['비에이치씨(BHC)', '비에이치씨'],
+    BBQ: ['BBQ치킨', 'BBQ 치킨앤비어'],
+    '60계치킨': ['60계'],
+    푸라닭: ['푸라닭치킨'],
+    '호식이두마리치킨': ['호식이 두마리치킨']
 };
 
 // ========== INITIALIZATION ==========
@@ -25,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLanguages();
     initShare();
     initStats();      // New
+    initBrandDirectory(); // New
     initGoogleLogin(); // New
     showPage('home');
 });
@@ -47,6 +64,318 @@ function initStats() {
 
         statsEl.innerHTML = stats[lang] || stats.en;
     }
+}
+
+function normalizeBrandKey(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/[()]/g, '')
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9가-힣]/g, '');
+}
+
+function parseStoreCount(value) {
+    const digits = String(value || '').replace(/[^0-9]/g, '');
+    if (!digits) return null;
+    const parsed = parseInt(digits, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseCsvRows(text) {
+    const rows = [];
+    let row = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (char === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+            continue;
+        }
+
+        if (char === ',' && !inQuotes) {
+            row.push(current);
+            current = '';
+            continue;
+        }
+
+        if ((char === '\n' || char === '\r') && !inQuotes) {
+            if (char === '\r' && text[i + 1] === '\n') i++;
+            row.push(current);
+            rows.push(row);
+            row = [];
+            current = '';
+            continue;
+        }
+
+        current += char;
+    }
+
+    if (current.length || row.length) {
+        row.push(current);
+        rows.push(row);
+    }
+
+    return rows.filter(r => r.some(cell => String(cell).trim().length > 0));
+}
+
+function mapSheetRows(rawRows) {
+    return rawRows
+        .map(row => {
+            const brandName = String(row.brandName || '').trim();
+            const category = String(row.category || '').trim();
+            return {
+                brandName,
+                category,
+                storeCount: parseStoreCount(row.storeCount),
+                normalized: normalizeBrandKey(brandName)
+            };
+        })
+        .filter(row => row.brandName);
+}
+
+async function fetchBrandSheetFromJson() {
+    const response = await fetch(BRAND_SHEET_JSON_URL);
+    if (!response.ok) throw new Error(`Brand sheet JSON fetch failed: ${response.status}`);
+
+    const jsonRows = await response.json();
+    const mappedRows = mapSheetRows(
+        jsonRows.map(row => ({
+            brandName: row['브랜드명'],
+            category: row['분류'],
+            storeCount: row['매장 수 (추정)']
+        }))
+    );
+
+    return { rows: mappedRows, source: 'json' };
+}
+
+async function fetchBrandSheetFromCsv() {
+    const response = await fetch(BRAND_SHEET_CSV_URL);
+    if (!response.ok) throw new Error(`Brand sheet CSV fetch failed: ${response.status}`);
+
+    const csvText = await response.text();
+    const rows = parseCsvRows(csvText);
+    if (!rows.length) throw new Error('Brand sheet CSV is empty.');
+
+    const headers = rows[0].map(header => String(header || '').replace(/^\uFEFF/, '').trim());
+    const brandIndex = headers.findIndex(header => header.includes('브랜드명'));
+    const categoryIndex = headers.findIndex(header => header.includes('분류'));
+    const storeIndex = headers.findIndex(header => header.includes('매장'));
+
+    if (brandIndex === -1 || categoryIndex === -1 || storeIndex === -1) {
+        throw new Error('Brand sheet CSV header mismatch.');
+    }
+
+    const mappedRows = mapSheetRows(rows.slice(1).map(row => ({
+        brandName: row[brandIndex],
+        category: row[categoryIndex],
+        storeCount: row[storeIndex]
+    })));
+
+    return { rows: mappedRows, source: 'csv' };
+}
+
+function loadBrandSheetCache() {
+    try {
+        const raw = localStorage.getItem(BRAND_SHEET_CACHE_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.rows) || !parsed.fetchedAt) return null;
+
+        return parsed;
+    } catch (error) {
+        console.warn('Failed to parse brand sheet cache:', error);
+        return null;
+    }
+}
+
+function saveBrandSheetCache(rows, source) {
+    try {
+        localStorage.setItem(BRAND_SHEET_CACHE_KEY, JSON.stringify({
+            rows,
+            source,
+            fetchedAt: Date.now()
+        }));
+    } catch (error) {
+        console.warn('Failed to save brand sheet cache:', error);
+    }
+}
+
+async function loadBrandSheetRows() {
+    const cached = loadBrandSheetCache();
+    const isCacheValid = cached && Date.now() - cached.fetchedAt < BRAND_SHEET_CACHE_TTL_MS;
+
+    if (isCacheValid) {
+        return { rows: cached.rows, source: cached.source || 'cache', fetchedAt: cached.fetchedAt };
+    }
+
+    try {
+        const jsonResult = await fetchBrandSheetFromJson();
+        saveBrandSheetCache(jsonResult.rows, jsonResult.source);
+        return { rows: jsonResult.rows, source: jsonResult.source, fetchedAt: Date.now() };
+    } catch (jsonError) {
+        console.warn('Brand sheet JSON load failed, trying CSV:', jsonError);
+    }
+
+    try {
+        const csvResult = await fetchBrandSheetFromCsv();
+        saveBrandSheetCache(csvResult.rows, csvResult.source);
+        return { rows: csvResult.rows, source: csvResult.source, fetchedAt: Date.now() };
+    } catch (csvError) {
+        console.warn('Brand sheet CSV load failed:', csvError);
+    }
+
+    if (cached) {
+        return { rows: cached.rows, source: 'stale-cache', fetchedAt: cached.fetchedAt };
+    }
+
+    throw new Error('Failed to load brand sheet data.');
+}
+
+function collectServiceBrands() {
+    const byBrand = new Map();
+
+    MENU_ITEMS.forEach(item => {
+        if (!byBrand.has(item.brand)) {
+            byBrand.set(item.brand, {
+                brand: item.brand,
+                menuCount: 0,
+                brandImage: item.brandImage || '',
+                website: item.website || '#'
+            });
+        }
+
+        byBrand.get(item.brand).menuCount += 1;
+    });
+
+    return Array.from(byBrand.values());
+}
+
+function findSheetRowForBrand(brandName, sheetRows) {
+    const primaryKey = normalizeBrandKey(brandName);
+    const aliasKeys = (BRAND_MATCH_ALIASES[brandName] || []).map(normalizeBrandKey);
+    const keysToMatch = [primaryKey, ...aliasKeys].filter(Boolean);
+
+    const candidates = sheetRows.filter(row => {
+        const rowKey = row.normalized;
+        if (!rowKey || rowKey.length < 3) return false;
+
+        return keysToMatch.some(key => {
+            if (!key || key.length < 3) return false;
+            return rowKey === key || rowKey.includes(key) || key.includes(rowKey);
+        });
+    });
+
+    if (!candidates.length) return null;
+
+    return candidates.sort((a, b) => (b.storeCount || -1) - (a.storeCount || -1))[0];
+}
+
+function buildBrandDirectoryRecords(sheetRows) {
+    return collectServiceBrands()
+        .map(serviceBrand => {
+            const matched = findSheetRowForBrand(serviceBrand.brand, sheetRows);
+            return {
+                ...serviceBrand,
+                category: matched?.category || null,
+                storeCount: matched?.storeCount ?? null,
+                sourceBrandName: matched?.brandName || null
+            };
+        })
+        .sort((a, b) => (b.storeCount || -1) - (a.storeCount || -1) || a.brand.localeCompare(b.brand, 'ko'));
+}
+
+function translateSheetCategory(category, lang) {
+    const labels = {
+        대형: { en: 'Major', ko: '대형', zh: '大型', ja: '大手' },
+        중형: { en: 'Mid-size', ko: '중형', zh: '中型', ja: '中規模' },
+        소형: { en: 'Small', ko: '소형', zh: '小型', ja: '小規模' },
+        지역구: { en: 'Regional', ko: '지역구', zh: '地区型', ja: '地域密着' }
+    };
+
+    if (!category) return null;
+    return labels[category]?.[lang] || category;
+}
+
+function formatStoreCount(storeCount, lang) {
+    if (!Number.isFinite(storeCount)) {
+        return (lang === 'ko') ? '정보 없음' :
+            (lang === 'zh') ? '暂无' :
+                (lang === 'ja') ? 'データなし' : 'N/A';
+    }
+
+    const formatted = storeCount.toLocaleString();
+    return (lang === 'ko') ? `${formatted}개` :
+        (lang === 'zh') ? `${formatted}家` :
+            (lang === 'ja') ? `${formatted}店` : formatted;
+}
+
+function renderBrandDirectory() {
+    const container = document.getElementById('brand-directory-list');
+    const sourceEl = document.getElementById('brand-directory-source');
+    if (!container) return;
+
+    const strings = getStrings();
+    const lang = state.language || 'en';
+
+    if (!state.brandDirectory.length) {
+        container.innerHTML = `<div class="brand-directory-placeholder">${strings.brandLoading || 'Loading Google Sheets data...'}</div>`;
+    } else {
+        container.innerHTML = state.brandDirectory.map(record => {
+            const categoryText = translateSheetCategory(record.category, lang) || (strings.brandNotFound || 'No matched data');
+            const storeCountText = formatStoreCount(record.storeCount, lang);
+
+            return `
+        <article class="brand-directory-card">
+          <div class="brand-directory-top">
+            ${record.brandImage ? `<img class="brand-directory-logo" src="${record.brandImage}" alt="${record.brand} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
+            <div class="brand-directory-name">${record.brand}</div>
+          </div>
+          <div class="brand-directory-meta"><span>${strings.brandCategoryLabel || 'Category'}</span><strong>${categoryText}</strong></div>
+          <div class="brand-directory-meta"><span>${strings.brandStoreLabel || 'Stores'}</span><strong>${storeCountText}</strong></div>
+          <div class="brand-directory-meta"><span>${strings.brandMenuLabel || 'Menus'}</span><strong>${record.menuCount}</strong></div>
+        </article>
+      `;
+        }).join('');
+    }
+
+    if (sourceEl) {
+        if (!state.brandSheetMeta?.fetchedAt) {
+            sourceEl.textContent = '';
+        } else {
+            const dateText = new Date(state.brandSheetMeta.fetchedAt).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US');
+            sourceEl.textContent = `${strings.brandSourcePrefix || 'Source'}: ${strings.brandSourceGoogleSheet || 'Google Sheets'} · ${dateText}`;
+        }
+    }
+}
+
+function initBrandDirectory() {
+    renderBrandDirectory();
+
+    loadBrandSheetRows()
+        .then(result => {
+            state.brandDirectory = buildBrandDirectoryRecords(result.rows);
+            state.brandSheetMeta = {
+                source: result.source,
+                fetchedAt: result.fetchedAt
+            };
+            renderBrandDirectory();
+        })
+        .catch(error => {
+            console.error('Failed to initialize brand directory:', error);
+            state.brandDirectory = buildBrandDirectoryRecords([]);
+            state.brandSheetMeta = null;
+            renderBrandDirectory();
+        });
 }
 
 function initGoogleLogin() {
@@ -842,6 +1171,8 @@ function applyTranslations(lang) {
     update('hero-sub', strings.heroSub);
     update('start-quiz-btn', strings.startBtn);
     update('btn-hero-secondary', strings.seeTopPicks);
+    update('brand-directory-title', strings.brandDirectoryTitle);
+    update('brand-directory-subtitle', strings.brandDirectorySubtitle);
     update('header-premium-btn', lang === 'ko' ? '프리미엄' : (lang === 'zh' ? '高级版' : (lang === 'ja' ? 'プレミアム' : 'Premium')));
 
     // Quiz Buttons
@@ -858,6 +1189,7 @@ function applyTranslations(lang) {
 
     // Recalculate stats text in new language
     initStats();
+    renderBrandDirectory();
 
     // Re-render quiz if active
     if (state.currentPage === 'quiz') {
