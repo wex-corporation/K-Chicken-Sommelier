@@ -1054,11 +1054,11 @@ const CHICKEN_RAW_DATA = [
   }
 ];
 
-// Quiz configuration matches the user's requested 4 categories:
-// 1. Spiciness (매운정도) - 1 to 5
-// 2. Crispiness (바삭함) - 1 to 5
-// 3. Composition (구성) - Hard filter (Boneless, Whole, Wings/Legs, Combo, Any)
-// 4. Flavor (맛특징) - Tags selection
+// Quiz configuration aligned with the "치킨 메뉴 표준 분류 가이드" 4-step schema:
+// 1. 맵기 (Spiciness)
+// 2. 조리법 및 질감 (Texture & Method)
+// 3. 구성 및 부위 (Part Composition)
+// 4. 소스 및 맛 베이스 (Flavor Profile)
 
 const QUIZ_QUESTIONS = [
   {
@@ -1066,23 +1066,24 @@ const QUIZ_QUESTIONS = [
     title: '매운 정도는?',
     type: 'scale',
     options: [
-      { label: '안 매운 (진라면 순한맛)', value: 1 },
-      { label: '살짝 매콤 (신라면 수준)', value: 2 },
-      { label: '매콤 (불닭볶음면 수준)', value: 3 },
-      { label: '매운 (핵불닭 수준)', value: 4 },
-      { label: '아주 매운 (신의 영역)', value: 5 }
+      { label: '안 매움 (후라이드/허니콤보)', value: 1 },
+      { label: '순한맛 (진라면 순한맛)', value: 2 },
+      { label: '보통 (신라면 수준)', value: 3 },
+      { label: '매운맛 (불닭볶음면 수준)', value: 4 },
+      { label: '아주 매운맛 (핵불닭 이상)', value: 5 }
     ]
   },
   {
-    id: 'crispiness',
-    title: '바삭함 정도는?',
-    type: 'scale',
+    id: 'texture_method',
+    title: '조리법/질감 선호는?',
+    type: 'filter',
     options: [
-      { label: '부드러운 (1단계)', value: 1 },
-      { label: '약간 바삭 (2단계)', value: 2 },
-      { label: '바삭 (3단계)', value: 3 },
-      { label: '아주 바삭 (4단계)', value: 4 },
-      { label: '크런치 (5단계)', value: 5 }
+      { label: '상관없음', value: 'any' },
+      { label: '크리스피 (두꺼운 튀김옷)', value: 'crispy' },
+      { label: '엠보싱 (얇은 튀김옷/시장통닭)', value: 'embossed' },
+      { label: '구운(오븐베이크)', value: 'baked' },
+      { label: '구운(로스트)', value: 'roast' },
+      { label: '볶음(숯불/조림)', value: 'stirfry' }
     ]
   },
   {
@@ -1091,27 +1092,24 @@ const QUIZ_QUESTIONS = [
     type: 'filter',
     options: [
       { label: '상관없음', value: 'any' },
-      { label: '순살', value: '순살' },
-      { label: '콤보 (다리+날개)', value: '콤보' },
-      { label: '윙봉', value: '윙봉' },
-      { label: '다리만', value: '다리' },
-      { label: '한마리 (뼈)', value: '전체' }
+      { label: '뼈(한마리)', value: 'whole_bone' },
+      { label: '부분육(윙봉/콤보)', value: 'wing_combo' },
+      { label: '순살(다리살)', value: 'boneless_thigh' },
+      { label: '순살(가슴살/안심)', value: 'boneless_breast' },
+      { label: '순살(혼합)', value: 'boneless_mix' }
     ]
   },
   {
-    id: 'flavor',
-    title: '원하는 맛 특징은?',
-    type: 'tags',
+    id: 'sauce_profile',
+    title: '소스 및 맛 베이스는?',
+    type: 'filter',
     options: [
-      { label: '단짠', value: '단짠' },
-      { label: '고소', value: '고소' },
-      { label: '매콤', value: '매콤' },
-      { label: '치즈', value: '치즈' },
-      { label: '마늘', value: '마늘' },
-      { label: '간장', value: '간장' },
-      { label: '깔끔', value: '깔끔' },
-      { label: '크리미', value: '크리미' },
-      { label: '불맛', value: '불맛' }
+      { label: '상관없음', value: 'any' },
+      { label: '후라이드(None)', value: 'none' },
+      { label: '양념(레드)', value: 'red' },
+      { label: '간장(블랙)', value: 'black' },
+      { label: '크리미(화이트)', value: 'white' },
+      { label: '시즈닝(파우더)', value: 'powder' }
     ]
   }
 ];
@@ -1573,48 +1571,46 @@ const UI_STRINGS = {
 // Simplified translation object for the new quiz structure
 const QUIZ_TRANSLATIONS = {
   spiciness: {
-    title: { en: "How spicy?", ko: "매운 정도는?", zh: "有多辣？", ja: "辛さは？" },
+    title: { en: "Spiciness level?", ko: "매운 정도는?", zh: "辣度等级？", ja: "辛さレベルは？" },
     options: {
-      1: { en: "Mild", ko: "안 매운 (진라면 순한맛)", zh: "不辣", ja: "辛くない" },
-      2: { en: "Slightly Spicy", ko: "살짝 매콤 (신라면 수준)", zh: "微辣", ja: "少し辛い" },
-      3: { en: "Spicy", ko: "매콤 (불닭볶음면 수준)", zh: "辣", ja: "辛い" },
-      4: { en: "Very Spicy", ko: "매운 (핵불닭 수준)", zh: "很辣", ja: "とても辛い" },
-      5: { en: "Extreme", ko: "아주 매운 (신의 영역)", zh: "变态辣", ja: "激辛" }
+      1: { en: "None (Fried/Honey)", ko: "안 매움 (후라이드/허니콤보)", zh: "不辣（原味/蜂蜜）", ja: "辛くない（フライド/ハニー）" },
+      2: { en: "Mild (Jin mild ramen)", ko: "순한맛 (진라면 순한맛)", zh: "微辣（真拉面温和）", ja: "マイルド（ジンラーメン甘口）" },
+      3: { en: "Standard (Shin ramen)", ko: "보통 (신라면 수준)", zh: "标准辣（辛拉面）", ja: "標準（辛ラーメン）" },
+      4: { en: "Spicy (Buldak)", ko: "매운맛 (불닭볶음면 수준)", zh: "很辣（火鸡面）", ja: "辛口（ブルダック）" },
+      5: { en: "Extreme (Nuclear Buldak+)", ko: "아주 매운맛 (핵불닭 이상)", zh: "极辣（核火鸡面以上）", ja: "激辛（核ブルダック以上）" }
     }
   },
-  crispiness: {
-    title: { en: "How crispy?", ko: "바삭함 정도는?", zh: "有多脆？", ja: "サクサク感は？" },
+  texture_method: {
+    title: { en: "Preferred texture/method?", ko: "조리법/질감 선호는?", zh: "偏好的做法/口感？", ja: "好みの調理法/食感は？" },
     options: {
-      1: { en: "Soft", ko: "부드러운", zh: "软嫩", ja: "柔らかい" },
-      2: { en: "Slightly Crispy", ko: "약간 바삭", zh: "微脆", ja: "少しサクサク" },
-      3: { en: "Crispy", ko: "바삭", zh: "酥脆", ja: "サクサク" },
-      4: { en: "Very Crispy", ko: "아주 바삭", zh: "很脆", ja: "とてもサクサク" },
-      5: { en: "Crunchy", ko: "크런치 (극강바삭)", zh: "咔滋脆", ja: "ザクザク" }
+      'any': { en: "Any", ko: "상관없음", zh: "都可以", ja: "こだわらない" },
+      'crispy': { en: "Crispy (Thick batter)", ko: "크리스피 (두꺼운 튀김옷)", zh: "酥脆（厚炸衣）", ja: "クリスピー（厚衣）" },
+      'embossed': { en: "Embossed (Thin batter)", ko: "엠보싱 (얇은 튀김옷/시장통닭)", zh: "薄皮（市场风）", ja: "エンボス（薄衣/市場風）" },
+      'baked': { en: "Baked (Oven + powder)", ko: "구운(오븐베이크)", zh: "烘烤（类似脆烤）", ja: "ベイク（オーブンベイク）" },
+      'roast': { en: "Roast (No batter)", ko: "구운(로스트)", zh: "烤制（无炸衣）", ja: "ロースト（衣なし）" },
+      'stirfry': { en: "Stir-fry (Charcoal/Braised)", ko: "볶음(숯불/조림)", zh: "炒/炖（炭火/酱炖）", ja: "炒め（炭火/煮込み）" }
     }
   },
   composition: {
     title: { en: "Preferred Cut?", ko: "선호하는 부위는?", zh: "喜欢的部位？", ja: "好みの部位は？" },
     options: {
       'any': { en: "Any", ko: "상관없음", zh: "无所谓", ja: "なんでも" },
-      '순살': { en: "Boneless", ko: "순살", zh: "无骨", ja: "骨なし" },
-      '콤보': { en: "Combo (Legs+Wings)", ko: "콤보 (다리+날개)", zh: "组合 (腿+翅)", ja: "コンボ (足+手羽)" },
-      '윙봉': { en: "Wings", ko: "윙봉", zh: "翅膀", ja: "手羽" },
-      '다리': { en: "Legs", ko: "다리만", zh: "鸡腿", ja: "足のみ" },
-      '전체': { en: "Whole Chicken", ko: "한마리 (뼈)", zh: "整鸡", ja: "丸ごと" }
+      'whole_bone': { en: "Bone-in (Whole)", ko: "뼈(한마리)", zh: "带骨（整只）", ja: "骨あり（丸鶏）" },
+      'wing_combo': { en: "Wing/Combo Cuts", ko: "부분육(윙봉/콤보)", zh: "翅/拼盘部位", ja: "部分肉（手羽/コンボ）" },
+      'boneless_thigh': { en: "Boneless (Thigh)", ko: "순살(다리살)", zh: "无骨（腿肉）", ja: "骨なし（もも肉）" },
+      'boneless_breast': { en: "Boneless (Breast/Tender)", ko: "순살(가슴살/안심)", zh: "无骨（胸肉/里脊）", ja: "骨なし（むね/ささみ）" },
+      'boneless_mix': { en: "Boneless (Mixed)", ko: "순살(혼합)", zh: "无骨（混合）", ja: "骨なし（ミックス）" }
     }
   },
-  flavor: {
-    title: { en: "Preferred Flavor?", ko: "원하는 맛 특징은?", zh: "喜欢的口味？", ja: "好みの味は？" },
+  sauce_profile: {
+    title: { en: "Sauce / flavor base?", ko: "소스 및 맛 베이스는?", zh: "偏好的酱汁基底？", ja: "ソースのベースは？" },
     options: {
-      '단짠': { en: "Sweet & Salty", ko: "단짠", zh: "甜咸", ja: "甘じょっぱい" },
-      '고소': { en: "Nutty/Savory", ko: "고소", zh: "香浓", ja: "香ばしい" },
-      '매콤': { en: "Spicy", ko: "매콤", zh: "香辣", ja: "ピリ辛" },
-      '치즈': { en: "Cheese", ko: "치즈", zh: "芝士", ja: "チーズ" },
-      '마늘': { en: "Garlic", ko: "마늘", zh: "大蒜", ja: "ニンニク" },
-      '간장': { en: "Soy Sauce", ko: "간장", zh: "酱油", ja: "醤油" },
-      '깔끔': { en: "Clean", ko: "깔끔", zh: "清爽", ja: "さっぱり" },
-      '크리미': { en: "Creamy", ko: "크리미", zh: "奶油", ja: "クリーミー" },
-      '불맛': { en: "Smoky", ko: "불맛", zh: "烟熏", ja: "炭火焼き" }
+      'any': { en: "Any", ko: "상관없음", zh: "都可以", ja: "こだわらない" },
+      'none': { en: "Fried (No Sauce)", ko: "후라이드(None)", zh: "原味（无酱）", ja: "フライド（ソースなし）" },
+      'red': { en: "Seasoned (Red)", ko: "양념(레드)", zh: "韩式红酱", ja: "ヤンニョム（レッド）" },
+      'black': { en: "Soy (Black)", ko: "간장(블랙)", zh: "酱油（黑）", ja: "醤油（ブラック）" },
+      'white': { en: "Creamy (White)", ko: "크리미(화이트)", zh: "奶油（白）", ja: "クリーミー（ホワイト）" },
+      'powder': { en: "Seasoning (Powder)", ko: "시즈닝(파우더)", zh: "干粉调味", ja: "シーズニング（パウダー）" }
     }
   }
 };

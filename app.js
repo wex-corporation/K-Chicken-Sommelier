@@ -5,9 +5,7 @@ console.log("Start of app.js execution");
 const state = {
     currentPage: 'home',
     currentQuestion: 0,
-    answers: {
-        flavor: [] // Initialize array for multi-select
-    },
+    answers: {},
     userProfile: null,
     matches: [],
     isPremium: false,
@@ -433,7 +431,7 @@ function initNavigation() {
     document.querySelectorAll('[data-action="start-quiz"]').forEach(btn => {
         btn.addEventListener('click', () => {
             state.currentQuestion = 0;
-            state.answers = { flavor: [] };
+            state.answers = {};
             showPage('quiz');
         });
     });
@@ -645,60 +643,122 @@ function handleQuizBack() {
 }
 
 // ========== SCORING ALGORITHM ==========
-function calculateResults() {
-    const userSpiciness = state.answers.spiciness || 3;
-    const userCrispiness = state.answers.crispiness || 3;
-    const userComposition = state.answers.composition || 'any';
-    const userFlavors = state.answers.flavor || [];
+const THIGH_BONELESS_BRANDS = new Set([
+    '굽네치킨', '푸라닭', 'BBQ', '맘스터치', '60계치킨', '노랑통닭', '자담치킨', '호식이두마리치킨', '또래오래'
+]);
+const BREAST_BONELESS_BRANDS = new Set([
+    '네네치킨', 'KFC'
+]);
 
-    // Filter first
-    let candidates = MENU_ITEMS;
-    if (userComposition !== 'any') {
-        candidates = candidates.filter(item => {
-            // Check if item.composition includes the selected one
-            // item.composition is array of strings e.g. ["전체", "반반", "순살"]
-            // userComposition is string e.g. "순살"
-            return item.composition && item.composition.includes(userComposition);
-        });
+function inferBonelessType(item) {
+    const composition = item.composition || [];
+    const name = item.name || '';
+    if (!composition.includes('순살')) return null;
+
+    if (/싸이|다리살|통다리/.test(name)) return 'boneless_thigh';
+    if (/가슴|안심|텐더/.test(name)) return 'boneless_breast';
+    if (THIGH_BONELESS_BRANDS.has(item.brand)) return 'boneless_thigh';
+    if (BREAST_BONELESS_BRANDS.has(item.brand)) return 'boneless_breast';
+    return 'boneless_mix';
+}
+
+function matchesCompositionPreference(item, preference) {
+    if (preference === 'any') return true;
+    const composition = item.composition || [];
+
+    switch (preference) {
+        case 'whole_bone':
+            return composition.includes('전체');
+        case 'wing_combo':
+            return composition.includes('윙봉') || composition.includes('콤보');
+        case 'boneless_thigh':
+            return composition.includes('순살') && inferBonelessType(item) === 'boneless_thigh';
+        case 'boneless_breast':
+            return composition.includes('순살') && inferBonelessType(item) === 'boneless_breast';
+        case 'boneless_mix':
+            return composition.includes('순살') && inferBonelessType(item) === 'boneless_mix';
+        default:
+            return true;
+    }
+}
+
+function classifyTextureMethod(item) {
+    const method = item.cooking_method || '';
+    const name = item.name || '';
+    const crispiness = item.crispiness || 3;
+
+    if (/숯불|조림/.test(method) || /숯불|양념구이/.test(name) || item.brand === '지코바치킨') {
+        return 'stirfry';
     }
 
-    // Score
+    if (/오븐/.test(method) || /오븐/.test(name)) {
+        if (crispiness >= 3 || /바사삭|크리스피/.test(name)) return 'baked';
+        return 'roast';
+    }
+
+    if (/구이/.test(method) || /구이/.test(name)) return 'roast';
+
+    if (crispiness >= 4 || /크리스피|핫크리스피/.test(name)) return 'crispy';
+
+    return 'embossed';
+}
+
+function classifySauceProfile(item) {
+    const name = item.name || '';
+    const tags = item.flavor_tags || [];
+    const hasTag = (target) => tags.includes(target);
+
+    if (/뿌링|스노윙|시즈닝|콘소메|파우더/.test(name) || hasTag('시즈닝') || hasTag('콘소메')) {
+        return 'powder';
+    }
+    if (/마요|크림|치즈|어니언|화이트/.test(name) || hasTag('치즈') || hasTag('요거트') || hasTag('크리미')) {
+        return 'white';
+    }
+    if (/간장|갈비|맛초킹|소이|블랙/.test(name) || hasTag('간장') || hasTag('마늘간장') || hasTag('짭조름')) {
+        return 'black';
+    }
+    if (/양념|레드|핫|칠리|고추|불닭|땡초|볼케이노/.test(name) || hasTag('매콤') || hasTag('매운') || hasTag('고추')) {
+        return 'red';
+    }
+    return 'none';
+}
+
+function calculateResults() {
+    const userSpiciness = Number(state.answers.spiciness) || 3;
+    const userTextureMethod = state.answers.texture_method || 'any';
+    const userComposition = state.answers.composition || 'any';
+    const userSauceProfile = state.answers.sauce_profile || 'any';
+
+    const compositionFiltered = MENU_ITEMS.filter(item => matchesCompositionPreference(item, userComposition));
+    const candidates = compositionFiltered.length > 0 ? compositionFiltered : MENU_ITEMS;
+
     const scored = candidates.map(item => {
-        // 1. Spiciness Match (Max 30 pts)
-        // distance: 0 (perfect) -> 30pts, 1 -> 20pts, 2 -> 10, ...
         const spiceDiff = Math.abs(userSpiciness - item.spiciness);
-        const spiceScore = Math.max(0, 30 - (spiceDiff * 10));
+        const spiceScore = Math.max(0, 35 - (spiceDiff * 8));
 
-        // 2. Crispiness Match (Max 30 pts)
-        const crispDiff = Math.abs(userCrispiness - item.crispiness);
-        const crispScore = Math.max(0, 30 - (crispDiff * 10));
+        const textureType = classifyTextureMethod(item);
+        const sauceType = classifySauceProfile(item);
 
-        // 3. Flavor Match (Max 40 pts)
-        // Count overlapping tags
-        let matchCount = 0;
-        if (userFlavors.length > 0) {
-            matchCount = userFlavors.filter(tag => item.flavor_tags.includes(tag)).length;
-            // Normalize: if user picked 3 tags and item has 2 matches -> great.
-            // Let's just give points per match.
-        }
-        const flavorScore = Math.min(40, matchCount * 15); // 1 match=15, 2=30, 3=40(max)
+        const textureScore = userTextureMethod === 'any' ? 12 : (textureType === userTextureMethod ? 25 : 0);
+        const sauceScore = userSauceProfile === 'any' ? 12 : (sauceType === userSauceProfile ? 25 : 0);
+        const compositionScore = matchesCompositionPreference(item, userComposition)
+            ? (userComposition === 'any' ? 8 : 15)
+            : 0;
 
-        const totalScore = spiceScore + crispScore + flavorScore;
-        const normalizedScore = Math.min(99, totalScore + 10); // base shift
+        const totalScore = spiceScore + textureScore + sauceScore + compositionScore;
+        const normalizedScore = Math.max(50, Math.min(99, Math.round(totalScore + 15)));
 
         return { ...item, score: normalizedScore };
     });
 
-    // Sort
     scored.sort((a, b) => b.score - a.score);
     state.matches = scored.slice(0, 3);
 
-    // Build user profile text
     state.userProfile = {
         spiciness: userSpiciness,
-        crispiness: userCrispiness,
+        texture_method: userTextureMethod,
         composition: userComposition,
-        flavor: userFlavors.join(', ')
+        sauce_profile: userSauceProfile
     };
 
     addToHistory();
