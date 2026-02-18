@@ -417,11 +417,16 @@ function getTranslatedTags(item, lang) {
 }
 
 function getTranslatedDescription(item, lang) {
-    // Description is always in Korean from raw data
-    // For non-Korean, we keep Korean but show it in a helpful way
+    const koName = item.name;
     if (lang === 'ko') return item.description || '';
-    // For other languages, we won't machine-translate inline, just show Korean with context
-    return item.description || '';
+
+    // Check for specific description translation
+    const t = MENU_DESCRIPTION_TRANSLATIONS[koName];
+    if (t && t[lang]) return t[lang];
+
+    // Fallback: Show Korean with an "Original" label for non-Korean users
+    const label = lang === 'zh' ? '[韩文原文]' : (lang === 'ja' ? '[韓国語原文]' : '[Korean Original]');
+    return item.description ? `${label} ${item.description}` : '';
 }
 
 function getTranslatedBadge(badge, lang) {
@@ -810,22 +815,7 @@ function openShareModal() {
         preview.textContent = buildShareText();
     }
 
-    // Set title/subtitle based on language
-    const lang = state.language || 'en';
-    const title = document.getElementById('share-sheet-title');
-    const subtitle = document.getElementById('share-sheet-subtitle');
-    if (title) {
-        title.textContent = lang === 'ko' ? '결과 공유하기' :
-            lang === 'zh' ? '分享结果' :
-                lang === 'ja' ? '結果をシェア' :
-                    'Share your result';
-    }
-    if (subtitle) {
-        subtitle.textContent = lang === 'ko' ? 'SNS에 자랑해보세요! 멘트와 해시태그가 자동 입력됩니다.' :
-            lang === 'zh' ? '在社交媒体上分享！文字和标签已自动生成。' :
-                lang === 'ja' ? 'SNSでシェアしよう！テキストとハッシュタグは自動入力されます。' :
-                    'Share on social media! Text and hashtags are auto-generated.';
-    }
+    // Text is now handled by applyTranslations
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
@@ -909,25 +899,42 @@ function applyTranslations(lang) {
         if (el) el.innerHTML = text;
     };
 
+    // Header
+    update('header-settings-btn', strings.headerSettings);
+    update('header-premium-btn', strings.headerPremium);
+
+    // Hero Section
     update('hero-headline', strings.heroHeadline);
     update('hero-sub', strings.heroSub);
     update('start-quiz-btn', strings.startBtn);
     update('btn-hero-secondary', strings.seeTopPicks);
-    update('header-premium-btn', lang === 'ko' ? '프리미엄' : (lang === 'zh' ? '高级版' : (lang === 'ja' ? 'プレミアム' : 'Premium')));
+    update('todays-weekly', strings.todaysWeekly);
 
-    // Quiz Buttons
-    update('quiz-next', strings.nextBtn); // Default state, updateQuizButtons will override if needed
+    // Teaser items (static ones in HTML)
+    update('teaser-badge-1', strings.topPick);
+    update('teaser-badge-2', strings.lowMess);
+    update('teaser-badge-3', strings.bestValue);
+    update('teaser-title-1', strings.teaserTitle1);
+    update('teaser-title-2', strings.teaserTitle2);
+    update('teaser-title-3', strings.teaserTitle3);
+    update('teaser-desc-1', strings.teaserSub1);
+    update('teaser-desc-2', strings.teaserSub2);
+    update('teaser-desc-3', strings.teaserSub3);
+
+    // Quiz Buttons & Progress
+    update('quiz-next', strings.nextBtn);
     update('quiz-skip', strings.skipBtn);
     update('back-btn-text', strings.backBtn);
+    update('no-account-note', strings.noAccount);
 
-    // Results Page Buttons
+    // Results Page
     update('results-title', strings.resultsTitle || 'Your Perfect Match');
     update('share-btn-text', strings.shareBtn || 'Share');
     update('btn-results-unlock', strings.unlockPremium || 'Unlock Premium');
     update('btn-results-retry', strings.tryAgain || 'Try another profile');
+    update('locked-section-title', strings.lockedTitle || 'Premium Unlocks');
 
     // Locked items
-    update('locked-section-title', strings.lockedTitle || 'Premium Unlocks');
     const lockedList = document.getElementById('locked-premium-section');
     if (lockedList) {
         const items = lockedList.querySelectorAll('.locked-item');
@@ -940,6 +947,7 @@ function applyTranslations(lang) {
     }
 
     // Premium Page
+    update('back-btn-text-premium', strings.backBtn);
     const premiumHeroTitle = document.querySelector('.premium-headline');
     if (premiumHeroTitle) premiumHeroTitle.textContent = strings.premiumHeroTitle || 'Go Full Sommelier';
     const premiumHeroSub = document.querySelector('.premium-sub');
@@ -947,29 +955,47 @@ function applyTranslations(lang) {
 
     const featureItems = document.querySelectorAll('.feature-item .feature-text');
     if (featureItems.length >= 5) {
-        featureItems[0].textContent = strings.feature1 || 'Group Order Mode';
-        featureItems[1].textContent = strings.feature2 || 'Deal Finder';
-        featureItems[2].textContent = strings.feature3 || 'Full Pairing Report';
-        featureItems[3].textContent = strings.feature4 || 'Regret Radar';
-        featureItems[4].textContent = strings.feature5 || 'Taste History';
+        featureItems[0].textContent = strings.feature1;
+        featureItems[1].textContent = strings.feature2;
+        featureItems[2].textContent = strings.feature3;
+        featureItems[3].textContent = strings.feature4;
+        featureItems[4].textContent = strings.feature5;
     }
 
-    const pricingNotes = document.querySelectorAll('.pricing-note');
-    pricingNotes.forEach(note => {
-        note.textContent = strings.pricingNote || 'First month free. Then $4.99/month. Cancel anytime.';
-    });
+    update('pricing-big', strings.pricingBig);
+    update('pricing-small', strings.pricingSmall);
+    update('pricing-micro', strings.pricingMicro);
+    update('start-free-btn', strings.startBtn);
+
+    update('trust-secure', strings.trustSecure);
+    update('trust-no-hidden', strings.trustNoHidden);
+    update('trust-cancel', strings.trustCancel);
+
+    update('faq-q-1', strings.faqQ1);
+    update('faq-a-1', strings.faqA1);
+    update('faq-q-2', strings.faqQ2);
+    update('faq-a-2', strings.faqA2);
+
+    // Settings Page
+    update('back-btn-text-settings', strings.backBtn);
+    update('settings-header-title', strings.settingsTitle);
+    update('settings-profile-title', strings.settingsProfile);
+    update('settings-edit-quiz', strings.settingsEditQuiz);
+    update('settings-history-title', strings.settingsHistory);
+    update('settings-feedback-title', strings.settingsFeedback);
+    update('settings-label-feedback', strings.settingsLabelFeedback);
+    update('settings-label-issue', strings.settingsLabelIssue);
+    update('settings-language-title', strings.settingsLang);
+    update('settings-label-lang', strings.settingsLang);
+
+    // Share Modal
+    update('share-sheet-title', strings.shareModalTitle);
+    update('share-sheet-subtitle', strings.shareModalSub);
+    update('share-label-copy', strings.shareCopy);
 
     if (state.currentPage === 'home') initStats();
-
-    // Re-render quiz if active
-    if (state.currentPage === 'quiz') {
-        renderQuizQuestion();
-    }
-
-    // Re-render results/cards if active 
-    if (state.currentPage === 'results') {
-        renderResults();
-    }
+    if (state.currentPage === 'quiz') renderQuizQuestion();
+    if (state.currentPage === 'results') renderResults();
 }
 
 // ========== LANGUAGES ==========
