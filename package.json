@@ -1,0 +1,15 @@
+{
+  "name": "k-chicken-sommelier",
+  "version": "1.0.0",
+  "description": "K-Chicken Sommelier is a 30-second taste quiz that recommends your Top 3 Korean chicken brands and menus for tonight. It scores your preferences like Crunch, Heat, and Sweetness, then shows a personalized match you can share with friends. Your first month is free to try premium picks.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.6.1"
+  }
+}
