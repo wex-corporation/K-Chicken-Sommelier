@@ -11,7 +11,8 @@ const state = {
     isPremium: false,
     history: [],
     brandDirectory: [],
-    brandSheetMeta: null
+    brandSheetMeta: null,
+    homeStats: null
 };
 
 const BRAND_SHEET_ID = '1CGhr6ETMKV3VTC_62Y-8hRgqt9KQQ-VXSnBQsdTkTnM';
@@ -45,18 +46,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ========== NEW FEATURES ==========
 function initStats() {
-    const totalMenus = MENU_ITEMS.length;
-    const uniqueBrands = new Set(MENU_ITEMS.map(item => item.brand)).size;
+    const fallbackMenus = MENU_ITEMS.length;
+    const fallbackBrands = new Set(MENU_ITEMS.map(item => item.brand)).size;
+    const totalMenus = Number.isFinite(state.homeStats?.totalMenus) ? state.homeStats.totalMenus : fallbackMenus;
+    const uniqueBrands = Number.isFinite(state.homeStats?.brandCount) ? state.homeStats.brandCount : fallbackBrands;
+    const sourceDate = state.brandSheetMeta?.fetchedAt
+        ? new Date(state.brandSheetMeta.fetchedAt).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+    const sourceLabel = state.homeStats?.fromSheet ? {
+        ko: '구글 시트',
+        en: 'Google Sheet',
+        zh: 'Google Sheets',
+        ja: 'Google Sheets'
+    } : {
+        ko: '로컬 데이터',
+        en: 'Local data',
+        zh: '本地数据',
+        ja: 'ローカルデータ'
+    };
     const statsEl = document.getElementById('data-stats');
     if (statsEl) {
         const lang = state.language || 'en';
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
         const stats = {
-            ko: `현재 <strong>${uniqueBrands}개 브랜드</strong>, <strong>${totalMenus}개 메뉴</strong> 분석 완료 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(실시간 DB: ${today})</span>`,
-            en: `Analyzing <strong>${uniqueBrands} Brands</strong> & <strong>${totalMenus} Menus</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(Real-time: ${today})</span>`,
-            zh: `正在分析 <strong>${uniqueBrands} 个品牌</strong> 和 <strong>${totalMenus} 个菜单</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(实时数据: ${today})</span>`,
-            ja: `現在 <strong>${uniqueBrands}つのブランド</strong>、<strong>${totalMenus}つのメニュー</strong>を分析中 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(リアルタイム: ${today})</span>`
+            ko: `현재 <strong>${uniqueBrands}개 브랜드</strong>, <strong>${totalMenus}개 메뉴</strong> 분석 완료 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(${sourceLabel.ko}: ${sourceDate})</span>`,
+            en: `Analyzing <strong>${uniqueBrands} Brands</strong> & <strong>${totalMenus} Menus</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(${sourceLabel.en}: ${sourceDate})</span>`,
+            zh: `正在分析 <strong>${uniqueBrands} 个品牌</strong> 和 <strong>${totalMenus} 个菜单</strong> 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(${sourceLabel.zh}: ${sourceDate})</span>`,
+            ja: `現在 <strong>${uniqueBrands}つのブランド</strong>、<strong>${totalMenus}つのメニュー</strong>を分析中 📊 <span style="font-size: 11px; color: #999; margin-left: 5px;">(${sourceLabel.ja}: ${sourceDate})</span>`
         };
 
         statsEl.innerHTML = stats[lang] || stats.en;
@@ -72,6 +88,13 @@ function normalizeBrandKey(value) {
 }
 
 function parseStoreCount(value) {
+    const digits = String(value || '').replace(/[^0-9]/g, '');
+    if (!digits) return null;
+    const parsed = parseInt(digits, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseMenuCount(value) {
     const digits = String(value || '').replace(/[^0-9]/g, '');
     if (!digits) return null;
     const parsed = parseInt(digits, 10);
@@ -132,6 +155,7 @@ function mapSheetRows(rawRows) {
                 brandName,
                 category,
                 storeCount: parseStoreCount(row.storeCount),
+                menuCount: parseMenuCount(row.menuCount),
                 normalized: normalizeBrandKey(brandName)
             };
         })
@@ -149,7 +173,8 @@ async function fetchBrandSheetFromJson() {
         jsonRows.map(row => ({
             brandName: row['브랜드명'],
             category: row['분류'],
-            storeCount: row['매장 수 (추정)']
+            storeCount: row['매장 수 (추정)'],
+            menuCount: row['메뉴 수'] || row['메뉴수'] || row['총 메뉴 수'] || row['총 메뉴수']
         }))
     );
 
@@ -170,6 +195,7 @@ async function fetchBrandSheetFromCsv() {
     const brandIndex = headers.findIndex(header => header.includes('브랜드명'));
     const categoryIndex = headers.findIndex(header => header.includes('분류'));
     const storeIndex = headers.findIndex(header => header.includes('매장'));
+    const menuIndex = headers.findIndex(header => header.includes('메뉴'));
 
     if (brandIndex === -1 || categoryIndex === -1 || storeIndex === -1) {
         throw new Error('Brand sheet CSV header mismatch.');
@@ -178,7 +204,8 @@ async function fetchBrandSheetFromCsv() {
     const mappedRows = mapSheetRows(rows.slice(1).map(row => ({
         brandName: row[brandIndex],
         category: row[categoryIndex],
-        storeCount: row[storeIndex]
+        storeCount: row[storeIndex],
+        menuCount: menuIndex === -1 ? null : row[menuIndex]
     })));
 
     return { rows: mappedRows, source: 'csv' };
@@ -290,6 +317,29 @@ function buildBrandDirectoryRecords(sheetRows) {
         .sort((a, b) => (b.storeCount || -1) - (a.storeCount || -1) || a.brand.localeCompare(b.brand, 'ko'));
 }
 
+function computeHomeStatsFromSheet(sheetRows) {
+    const uniqueSheetBrandKeys = new Set(
+        sheetRows.map(row => row.normalized).filter(Boolean)
+    );
+    const serviceBrands = collectServiceBrands();
+    const matchedServiceBrands = serviceBrands.filter(serviceBrand => (
+        Boolean(findSheetRowForBrand(serviceBrand.brand, sheetRows))
+    ));
+
+    const sheetBrandCount = uniqueSheetBrandKeys.size;
+    const menusFromMatchedBrands = matchedServiceBrands.reduce((sum, record) => sum + record.menuCount, 0);
+    const hasExplicitMenuColumn = sheetRows.some(row => Number.isFinite(row.menuCount));
+    const menusFromSheetColumn = sheetRows.reduce((sum, row) => (
+        sum + (Number.isFinite(row.menuCount) ? row.menuCount : 0)
+    ), 0);
+
+    return {
+        brandCount: sheetBrandCount || matchedServiceBrands.length,
+        totalMenus: hasExplicitMenuColumn ? menusFromSheetColumn : menusFromMatchedBrands,
+        fromSheet: true
+    };
+}
+
 function translateSheetCategory(category, lang) {
     const labels = {
         대형: { en: 'Major', ko: '대형', zh: '大型', ja: '大手' },
@@ -360,17 +410,21 @@ function initBrandDirectory() {
     loadBrandSheetRows()
         .then(result => {
             state.brandDirectory = buildBrandDirectoryRecords(result.rows);
+            state.homeStats = computeHomeStatsFromSheet(result.rows);
             state.brandSheetMeta = {
                 source: result.source,
                 fetchedAt: result.fetchedAt
             };
             renderBrandDirectory();
+            initStats();
         })
         .catch(error => {
             console.error('Failed to initialize brand directory:', error);
             state.brandDirectory = buildBrandDirectoryRecords([]);
             state.brandSheetMeta = null;
+            state.homeStats = null;
             renderBrandDirectory();
+            initStats();
         });
 }
 
