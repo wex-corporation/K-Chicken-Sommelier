@@ -24,6 +24,7 @@
   <meta name="twitter:description" content="Find your perfect Korean fried chicken match in 30 seconds.">
   <meta name="twitter:image" content="https://k-chicken-sommelier.vercel.app/og-image.png">
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -119,9 +120,9 @@
       </header>
 
       <div class="progress-container">
-        <div class="progress-text" id="progress-text">Question 1 of 6</div>
+        <div class="progress-text" id="progress-text">Question 1 of 5</div>
         <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill" style="width: 16.67%"></div>
+          <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
         </div>
       </div>
 
@@ -130,6 +131,9 @@
         <div class="quiz-options" id="quiz-options">
           <!-- Options rendered by JS -->
         </div>
+        <section class="quiz-live-reco" id="quiz-live-reco">
+          <!-- Rendered by JS -->
+        </section>
       </div>
 
       <div class="bottom-bar">
@@ -172,9 +176,17 @@
         <div id="match-cards">
           <!-- Match cards rendered by JS -->
         </div>
+      </section>
 
-        <!-- NEW: SNS Share Button Area -->
-
+      <section class="section nearby-section" id="nearby-section">
+        <div class="nearby-header">
+          <h2 class="section-title" id="nearby-title">Nearby Chicken within 10km</h2>
+          <button class="btn btn-secondary nearby-find-btn" data-action="find-nearby" id="nearby-find-btn">Find Near Me</button>
+        </div>
+        <p class="section-subtitle" id="nearby-subtitle">Use my location and get every chicken store found within 10km.</p>
+        <div class="nearby-status" id="nearby-status"></div>
+        <div class="nearby-map" id="nearby-map"></div>
+        <div class="nearby-list" id="nearby-list"></div>
       </section>
 
       <!-- Locked Premium Section -->
@@ -368,6 +380,7 @@
   <!-- Scripts -->
   <script defer src="/_vercel/insights/script.js"></script>
   <script src="data.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 

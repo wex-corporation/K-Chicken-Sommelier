@@ -1054,11 +1054,12 @@ const CHICKEN_RAW_DATA = [
   }
 ];
 
-// Quiz configuration aligned with the "치킨 메뉴 표준 분류 가이드" 4-step schema:
+// Quiz configuration aligned with the "치킨 메뉴 표준 분류 가이드" 5-step schema:
 // 1. 맵기 (Spiciness)
-// 2. 조리법 및 질감 (Texture & Method)
-// 3. 구성 및 부위 (Part Composition)
-// 4. 소스 및 맛 베이스 (Flavor Profile)
+// 2. 바삭함 강도 (Crispiness)
+// 3. 조리법 및 질감 (Texture & Method)
+// 4. 구성 및 부위 (Part Composition)
+// 5. 소스 및 맛 베이스 (Flavor Profile)
 
 const QUIZ_QUESTIONS = [
   {
@@ -1071,6 +1072,18 @@ const QUIZ_QUESTIONS = [
       { label: '보통 (신라면 수준)', value: 3 },
       { label: '매운맛 (불닭볶음면 수준)', value: 4 },
       { label: '아주 매운맛 (핵불닭 이상)', value: 5 }
+    ]
+  },
+  {
+    id: 'crispiness_preference',
+    title: '바삭함 강도는?',
+    type: 'scale',
+    options: [
+      { label: '촉촉함 위주', value: 1 },
+      { label: '부드러운 바삭', value: 2 },
+      { label: '밸런스형', value: 3 },
+      { label: '바삭함 선호', value: 4 },
+      { label: '극강 바삭', value: 5 }
     ]
   },
   {
@@ -1480,7 +1493,20 @@ const UI_STRINGS = {
     unlockPremium: "Unlock Premium",
     tryAgain: "Try another profile",
     seeTopPicks: "See Today's Top Picks",
-    premiumUnlocks: "Premium Unlocks"
+    premiumUnlocks: "Premium Unlocks",
+    liveRecoTitle: "Live Guess While You Answer",
+    liveRecoSubtitle: "Weighted recommendation updates after each step.",
+    liveRecoHint: "Select an option to see an early recommendation.",
+    liveRecoConfidence: "Confidence",
+    nearbyTitle: "Nearby Chicken within 10km",
+    nearbySubtitle: "Use my location and list every chicken store found nearby.",
+    nearbyFindBtn: "Find Near Me",
+    nearbyLoading: "Finding nearby stores...",
+    nearbyNeedPermission: "Location permission is required to find nearby stores.",
+    nearbyUnsupported: "Geolocation is not supported in this browser.",
+    nearbyNoStores: "No chicken stores found within 10km.",
+    nearbyOpenMap: "Open in map",
+    nearbyFoundSuffix: "stores found within 10km"
   },
   ko: {
     startBtn: "나의 치킨 찾기",
@@ -1508,7 +1534,20 @@ const UI_STRINGS = {
     unlockPremium: "프리미엄 잠금해제",
     tryAgain: "다른 취향으로 다시하기",
     seeTopPicks: "오늘의 추천 보기",
-    premiumUnlocks: "프리미엄 혜택"
+    premiumUnlocks: "프리미엄 혜택",
+    liveRecoTitle: "실시간 중간 추천",
+    liveRecoSubtitle: "단계별 가중치로 추천이 계속 업데이트됩니다.",
+    liveRecoHint: "옵션을 선택하면 중간 추천이 표시됩니다.",
+    liveRecoConfidence: "신뢰도",
+    nearbyTitle: "내 주변 10km 치킨 매장",
+    nearbySubtitle: "현재 위치를 기반으로 10km 내 매장을 모두 보여줍니다.",
+    nearbyFindBtn: "내 주변 매장 찾기",
+    nearbyLoading: "주변 치킨 매장을 찾는 중...",
+    nearbyNeedPermission: "주변 매장을 찾으려면 위치 권한이 필요합니다.",
+    nearbyUnsupported: "현재 브라우저는 위치 기능을 지원하지 않습니다.",
+    nearbyNoStores: "10km 내 치킨 매장을 찾지 못했습니다.",
+    nearbyOpenMap: "지도에서 열기",
+    nearbyFoundSuffix: "개 매장을 10km 내에서 찾았어요"
   },
   zh: {
     startBtn: "寻找我的炸鸡伴侣",
@@ -1536,7 +1575,20 @@ const UI_STRINGS = {
     unlockPremium: "解锁高级版",
     tryAgain: "重试其他口味",
     seeTopPicks: "查看今日推荐",
-    premiumUnlocks: "高级版福利"
+    premiumUnlocks: "高级版福利",
+    liveRecoTitle: "实时预测推荐",
+    liveRecoSubtitle: "每一步都会按权重更新推荐。",
+    liveRecoHint: "先选择一个选项，即可查看中途推荐。",
+    liveRecoConfidence: "置信度",
+    nearbyTitle: "10km 内附近炸鸡店",
+    nearbySubtitle: "基于你的定位，展示 10km 内的所有炸鸡店。",
+    nearbyFindBtn: "查找附近门店",
+    nearbyLoading: "正在查找附近炸鸡店...",
+    nearbyNeedPermission: "需要定位权限才能查找附近门店。",
+    nearbyUnsupported: "当前浏览器不支持定位功能。",
+    nearbyNoStores: "10km 内未找到炸鸡店。",
+    nearbyOpenMap: "在地图中打开",
+    nearbyFoundSuffix: "家门店（10km 内）"
   },
   ja: {
     startBtn: "私のチキンを探す",
@@ -1564,7 +1616,20 @@ const UI_STRINGS = {
     unlockPremium: "プレミアムを解除",
     tryAgain: "別の好みで試す",
     seeTopPicks: "今日のおすすめを見る",
-    premiumUnlocks: "プレミアム特典"
+    premiumUnlocks: "プレミアム特典",
+    liveRecoTitle: "回答中のリアルタイム推薦",
+    liveRecoSubtitle: "ステップごとに重み付けして推薦を更新します。",
+    liveRecoHint: "まずは1つ選ぶと中間推薦が表示されます。",
+    liveRecoConfidence: "信頼度",
+    nearbyTitle: "現在地から10kmのチキン店",
+    nearbySubtitle: "現在地を使って10km圏内の店舗をすべて表示します。",
+    nearbyFindBtn: "近くの店舗を探す",
+    nearbyLoading: "近くのチキン店を検索中...",
+    nearbyNeedPermission: "近くの店舗を探すには位置情報の許可が必要です。",
+    nearbyUnsupported: "このブラウザは位置情報に対応していません。",
+    nearbyNoStores: "10km圏内にチキン店が見つかりませんでした。",
+    nearbyOpenMap: "地図で開く",
+    nearbyFoundSuffix: "店舗（10km圏内）"
   }
 };
 
@@ -1578,6 +1643,16 @@ const QUIZ_TRANSLATIONS = {
       3: { en: "Standard (Shin ramen)", ko: "보통 (신라면 수준)", zh: "标准辣（辛拉面）", ja: "標準（辛ラーメン）" },
       4: { en: "Spicy (Buldak)", ko: "매운맛 (불닭볶음면 수준)", zh: "很辣（火鸡面）", ja: "辛口（ブルダック）" },
       5: { en: "Extreme (Nuclear Buldak+)", ko: "아주 매운맛 (핵불닭 이상)", zh: "极辣（核火鸡面以上）", ja: "激辛（核ブルダック以上）" }
+    }
+  },
+  crispiness_preference: {
+    title: { en: "Crispiness level?", ko: "바삭함 강도는?", zh: "偏好酥脆度？", ja: "サクサク感の好みは？" },
+    options: {
+      1: { en: "Moist & tender", ko: "촉촉함 위주", zh: "更偏湿润", ja: "しっとり重視" },
+      2: { en: "Lightly crispy", ko: "부드러운 바삭", zh: "轻微酥脆", ja: "軽いサクサク" },
+      3: { en: "Balanced", ko: "밸런스형", zh: "均衡", ja: "バランス型" },
+      4: { en: "Crunchy", ko: "바삭함 선호", zh: "偏脆", ja: "しっかりサクサク" },
+      5: { en: "Extra crunchy", ko: "극강 바삭", zh: "极致酥脆", ja: "超サクサク" }
     }
   },
   texture_method: {

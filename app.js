@@ -12,13 +12,19 @@ const state = {
     history: [],
     brandDirectory: [],
     brandSheetMeta: null,
-    homeStats: null
+    homeStats: null,
+    nearbyStores: [],
+    nearbyLocation: null,
+    nearbyMap: null,
+    nearbyMarkers: []
 };
 
 const BRAND_SHEET_ID = '1CGhr6ETMKV3VTC_62Y-8hRgqt9KQQ-VXSnBQsdTkTnM';
 const BRAND_SHEET_JSON_URL = `https://opensheet.elk.sh/${BRAND_SHEET_ID}/1`;
 const BRAND_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${BRAND_SHEET_ID}/gviz/tq?tqx=out:csv`;
 const BRAND_SHEET_CACHE_KEY = 'kcs-brand-sheet-cache-v1';
+const NEARBY_RADIUS_METERS = 10000;
+const CHICKEN_NAME_REGEX = '치킨|Chicken|Kyochon|BHC|BBQ|교촌|굽네|네네|푸라닭|처갓집|페리카나|멕시카나|지코바|호식이|60계|노랑통닭|자담|또래오래|KFC';
 
 const BRAND_MATCH_ALIASES = {
     BHC: ['비에이치씨(BHC)', '비에이치씨'],
@@ -38,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFAQ();
     initLanguages();
     initShare();
+    initNearbyStores();
     initStats();      // New
     initBrandDirectory(); // New
     initGoogleLogin(); // New
@@ -512,6 +519,20 @@ function initQuiz() {
     }
 }
 
+function getAnsweredQuestionIds(answers) {
+    return QUIZ_QUESTIONS
+        .map(question => question.id)
+        .filter(id => answers[id] !== undefined && answers[id] !== null && answers[id] !== '');
+}
+
+function getProgressText(questionIndex, totalQuestions, lang) {
+    const current = questionIndex + 1;
+    if (lang === 'ko') return `${current} / ${totalQuestions} 문항`;
+    if (lang === 'zh') return `第 ${current} / ${totalQuestions} 题`;
+    if (lang === 'ja') return `${current} / ${totalQuestions} 問`;
+    return `Question ${current} of ${totalQuestions}`;
+}
+
 function renderQuizQuestion() {
     const question = QUIZ_QUESTIONS[state.currentQuestion];
     if (!question) return;
@@ -522,7 +543,7 @@ function renderQuizQuestion() {
 
     // Update progress
     if (progressText) {
-        progressText.textContent = `Question ${state.currentQuestion + 1} of ${QUIZ_QUESTIONS.length}`;
+        progressText.textContent = getProgressText(state.currentQuestion, QUIZ_QUESTIONS.length, lang);
     }
     if (progressFill) {
         const progress = ((state.currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
@@ -552,6 +573,7 @@ function renderQuizQuestion() {
 
     // Update button states
     updateQuizButtons();
+    renderLiveRecommendation();
 }
 
 function renderSingleSelectOptions(container, question) {
@@ -777,42 +799,231 @@ function classifySauceProfile(item) {
     return 'none';
 }
 
-function calculateResults() {
-    const userSpiciness = Number(state.answers.spiciness) || 3;
-    const userTextureMethod = state.answers.texture_method || 'any';
-    const userComposition = state.answers.composition || 'any';
-    const userSauceProfile = state.answers.sauce_profile || 'any';
+function getAdaptiveWeights(answeredIds) {
+    const answeredCount = answeredIds.length;
+    const weights = {
+        spiciness: 1,
+        crispiness_preference: 1,
+        texture_method: 1,
+        composition: 1,
+        sauce_profile: 1
+    };
 
-    const compositionFiltered = MENU_ITEMS.filter(item => matchesCompositionPreference(item, userComposition));
-    const candidates = compositionFiltered.length > 0 ? compositionFiltered : MENU_ITEMS;
+    if (answeredCount <= 2) {
+        weights.spiciness = 1.45;
+        weights.crispiness_preference = 1.35;
+        weights.texture_method = 1.15;
+        weights.composition = 0.75;
+        weights.sauce_profile = 0.8;
+    } else if (answeredCount <= 4) {
+        weights.spiciness = 1.2;
+        weights.crispiness_preference = 1.2;
+        weights.texture_method = 1.25;
+        weights.composition = 1.15;
+        weights.sauce_profile = 1.2;
+    } else {
+        weights.spiciness = 1.15;
+        weights.crispiness_preference = 1.1;
+        weights.texture_method = 1.25;
+        weights.composition = 1.2;
+        weights.sauce_profile = 1.35;
+    }
 
-    const scored = candidates.map(item => {
-        const spiceDiff = Math.abs(userSpiciness - item.spiciness);
-        const spiceScore = Math.max(0, 35 - (spiceDiff * 8));
+    return weights;
+}
 
-        const textureType = classifyTextureMethod(item);
-        const sauceType = classifySauceProfile(item);
+function scoreMenuItem(item, answers, weights) {
+    let rawScore = 0;
+    let maxScore = 0;
+    const diagnostics = {};
 
-        const textureScore = userTextureMethod === 'any' ? 12 : (textureType === userTextureMethod ? 25 : 0);
-        const sauceScore = userSauceProfile === 'any' ? 12 : (sauceType === userSauceProfile ? 25 : 0);
-        const compositionScore = matchesCompositionPreference(item, userComposition)
-            ? (userComposition === 'any' ? 8 : 15)
-            : 0;
+    const userSpice = Number(answers.spiciness);
+    if (Number.isFinite(userSpice)) {
+        const spiceDiff = Math.abs(userSpice - (item.spiciness || 3));
+        const spiceBaseMax = 45;
+        const spiceComponent = Math.max(0, spiceBaseMax - (spiceDiff * 11));
+        rawScore += spiceComponent * weights.spiciness;
+        maxScore += spiceBaseMax * weights.spiciness;
+        diagnostics.spiceDiff = spiceDiff;
+    }
 
-        const totalScore = spiceScore + textureScore + sauceScore + compositionScore;
-        const normalizedScore = Math.max(50, Math.min(99, Math.round(totalScore + 15)));
+    const userCrispy = Number(answers.crispiness_preference);
+    if (Number.isFinite(userCrispy)) {
+        const crispyDiff = Math.abs(userCrispy - (item.crispiness || 3));
+        const crispyBaseMax = 32;
+        const crispyComponent = Math.max(0, crispyBaseMax - (crispyDiff * 8));
+        rawScore += crispyComponent * weights.crispiness_preference;
+        maxScore += crispyBaseMax * weights.crispiness_preference;
+        diagnostics.crispyDiff = crispyDiff;
+    }
 
-        return { ...item, score: normalizedScore };
+    const texturePref = answers.texture_method;
+    const textureType = classifyTextureMethod(item);
+    if (texturePref !== undefined) {
+        const textureBaseMax = 30;
+        const isAny = texturePref === 'any';
+        const isMatch = textureType === texturePref;
+        const textureComponent = isAny ? 14 : (isMatch ? textureBaseMax : 0);
+        rawScore += textureComponent * weights.texture_method;
+        maxScore += textureBaseMax * weights.texture_method;
+        diagnostics.textureMatch = isAny ? true : isMatch;
+    }
+
+    const compositionPref = answers.composition;
+    if (compositionPref !== undefined) {
+        const compositionBaseMax = 28;
+        const isAny = compositionPref === 'any';
+        const isMatch = matchesCompositionPreference(item, compositionPref);
+        const compositionComponent = isAny ? 12 : (isMatch ? compositionBaseMax : 0);
+        rawScore += compositionComponent * weights.composition;
+        maxScore += compositionBaseMax * weights.composition;
+        diagnostics.compositionMatch = isAny ? true : isMatch;
+    }
+
+    const saucePref = answers.sauce_profile;
+    const sauceType = classifySauceProfile(item);
+    if (saucePref !== undefined) {
+        const sauceBaseMax = 30;
+        const isAny = saucePref === 'any';
+        const isMatch = sauceType === saucePref;
+        const sauceComponent = isAny ? 14 : (isMatch ? sauceBaseMax : 0);
+        rawScore += sauceComponent * weights.sauce_profile;
+        maxScore += sauceBaseMax * weights.sauce_profile;
+        diagnostics.sauceMatch = isAny ? true : isMatch;
+    }
+
+    const normalizedScore = maxScore > 0
+        ? Math.max(50, Math.min(99, Math.round((rawScore / maxScore) * 49 + 50)))
+        : 50;
+
+    return {
+        ...item,
+        score: normalizedScore,
+        rawScore,
+        diagnostics,
+        textureType,
+        sauceType
+    };
+}
+
+function calculateRankedMatches(answers, options = {}) {
+    const { preview = false, limit = 3 } = options;
+    const answeredIds = getAnsweredQuestionIds(answers);
+    if (!answeredIds.length) return [];
+
+    const weights = getAdaptiveWeights(answeredIds);
+    const normalizedAnswers = {};
+    answeredIds.forEach(id => {
+        normalizedAnswers[id] = answers[id];
     });
 
-    scored.sort((a, b) => b.score - a.score);
-    state.matches = scored.slice(0, 3);
+    let candidates = MENU_ITEMS;
+    if (!preview && normalizedAnswers.composition && normalizedAnswers.composition !== 'any') {
+        const filtered = MENU_ITEMS.filter(item => matchesCompositionPreference(item, normalizedAnswers.composition));
+        if (filtered.length) candidates = filtered;
+    }
+
+    const scored = candidates.map(item => scoreMenuItem(item, normalizedAnswers, weights));
+    scored.sort((a, b) => b.rawScore - a.rawScore || b.score - a.score);
+    return scored.slice(0, limit);
+}
+
+function buildLiveReason(item, lang) {
+    const parts = [];
+    const d = item.diagnostics || {};
+
+    if (Number.isFinite(d.spiceDiff)) {
+        parts.push(lang === 'ko' ? `맵기 차이 ±${d.spiceDiff}` : `Spice ±${d.spiceDiff}`);
+    }
+    if (Number.isFinite(d.crispyDiff)) {
+        parts.push(lang === 'ko' ? `바삭함 차이 ±${d.crispyDiff}` : `Crispy ±${d.crispyDiff}`);
+    }
+    if (d.textureMatch !== undefined) {
+        parts.push(lang === 'ko'
+            ? (d.textureMatch ? '조리법 일치' : '조리법 비일치')
+            : (d.textureMatch ? 'Method match' : 'Method mismatch'));
+    }
+    if (d.sauceMatch !== undefined) {
+        parts.push(lang === 'ko'
+            ? (d.sauceMatch ? '소스 성향 일치' : '소스 성향 비일치')
+            : (d.sauceMatch ? 'Sauce match' : 'Sauce mismatch'));
+    }
+    if (d.compositionMatch !== undefined) {
+        parts.push(lang === 'ko'
+            ? (d.compositionMatch ? '부위 선호 일치' : '부위 선호 비일치')
+            : (d.compositionMatch ? 'Cut match' : 'Cut mismatch'));
+    }
+
+    return parts.slice(0, 2).join(' · ');
+}
+
+function renderLiveRecommendation() {
+    const container = document.getElementById('quiz-live-reco');
+    if (!container) return;
+
+    const strings = getStrings();
+    const lang = state.language || 'en';
+    const answeredIds = getAnsweredQuestionIds(state.answers);
+    const answeredCount = answeredIds.length;
+
+    if (!answeredCount) {
+        container.innerHTML = `
+      <div class="quiz-live-header">
+        <h3>${strings.liveRecoTitle || 'Live Guess While You Answer'}</h3>
+        <span>0 / ${QUIZ_QUESTIONS.length}</span>
+      </div>
+      <p class="quiz-live-subtitle">${strings.liveRecoHint || 'Select an option to see an early recommendation.'}</p>
+    `;
+        return;
+    }
+
+    const picks = calculateRankedMatches(state.answers, { preview: true, limit: 2 });
+    if (!picks.length) {
+        container.innerHTML = `
+      <div class="quiz-live-header">
+        <h3>${strings.liveRecoTitle || 'Live Guess While You Answer'}</h3>
+        <span>${answeredCount} / ${QUIZ_QUESTIONS.length}</span>
+      </div>
+      <p class="quiz-live-subtitle">${strings.liveRecoHint || 'Select an option to see an early recommendation.'}</p>
+    `;
+        return;
+    }
+
+    container.innerHTML = `
+    <div class="quiz-live-header">
+      <h3>${strings.liveRecoTitle || 'Live Guess While You Answer'}</h3>
+      <span>${answeredCount} / ${QUIZ_QUESTIONS.length}</span>
+    </div>
+    <p class="quiz-live-subtitle">${strings.liveRecoSubtitle || 'Weighted recommendation updates after each step.'}</p>
+    <div class="quiz-live-cards">
+      ${picks.map(item => {
+        const displayName = getTranslatedName(item, lang);
+        const reason = buildLiveReason(item, lang);
+        return `
+          <article class="quiz-live-card">
+            <img src="${item.image}" data-fallback="${item.fallbackImage || ''}" alt="${displayName}" class="quiz-live-image" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(this.dataset.fallback && this.src !== this.dataset.fallback){this.src=this.dataset.fallback;}">
+            <div class="quiz-live-meta">
+              <strong>${displayName}</strong>
+              <span>${item.brand}</span>
+              <div class="quiz-live-score">${strings.liveRecoConfidence || 'Confidence'} ${item.score}%</div>
+              <p>${reason}</p>
+            </div>
+          </article>
+        `;
+    }).join('')}
+    </div>
+  `;
+}
+
+function calculateResults() {
+    state.matches = calculateRankedMatches(state.answers, { preview: false, limit: 3 });
 
     state.userProfile = {
-        spiciness: userSpiciness,
-        texture_method: userTextureMethod,
-        composition: userComposition,
-        sauce_profile: userSauceProfile
+        spiciness: Number(state.answers.spiciness) || 3,
+        crispiness_preference: Number(state.answers.crispiness_preference) || 3,
+        texture_method: state.answers.texture_method || 'any',
+        composition: state.answers.composition || 'any',
+        sauce_profile: state.answers.sauce_profile || 'any'
     };
 
     addToHistory();
@@ -822,8 +1033,253 @@ function calculateResults() {
 // ========== RESULTS PAGE ==========
 function renderResults() {
     renderMatchCards();
+    renderNearbyStoresSection();
     updatePremiumSection();
     // Profile chips could be rendered if needed, but simplified for now
+}
+
+function initNearbyStores() {
+    const findBtn = document.getElementById('nearby-find-btn');
+    if (!findBtn) return;
+    findBtn.addEventListener('click', handleFindNearbyStores);
+    renderNearbyStoresSection();
+}
+
+function setNearbyStatus(message, type = '') {
+    const statusEl = document.getElementById('nearby-status');
+    if (!statusEl) return;
+    statusEl.className = `nearby-status ${type}`.trim();
+    statusEl.textContent = message || '';
+}
+
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const earthKm = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthKm * c;
+}
+
+function normalizeNearbyStore(rawStore, userLat, userLon) {
+    const lat = rawStore.lat ?? rawStore.center?.lat;
+    const lon = rawStore.lon ?? rawStore.center?.lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    const tags = rawStore.tags || {};
+    const name = String(tags.name || '').trim();
+    if (!name) return null;
+
+    const distanceKm = haversineDistanceKm(userLat, userLon, lat, lon);
+    return {
+        id: `${name}-${lat.toFixed(5)}-${lon.toFixed(5)}`,
+        name,
+        lat,
+        lon,
+        distanceKm,
+        cuisine: tags.cuisine || '',
+        address: tags['addr:full'] || `${tags['addr:street'] || ''} ${tags['addr:housenumber'] || ''}`.trim(),
+        mapLink: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
+    };
+}
+
+async function fetchNearbyChickenStores(latitude, longitude) {
+    const overpassQuery = `
+[out:json][timeout:25];
+(
+  node(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["cuisine"~"chicken|fried_chicken",i];
+  way(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["cuisine"~"chicken|fried_chicken",i];
+  relation(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["cuisine"~"chicken|fried_chicken",i];
+  node(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["name"~"${CHICKEN_NAME_REGEX}",i]["amenity"~"restaurant|fast_food",i];
+  way(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["name"~"${CHICKEN_NAME_REGEX}",i]["amenity"~"restaurant|fast_food",i];
+  relation(around:${NEARBY_RADIUS_METERS},${latitude},${longitude})["name"~"${CHICKEN_NAME_REGEX}",i]["amenity"~"restaurant|fast_food",i];
+);
+out center tags;
+`;
+
+    const endpoints = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter'
+    ];
+
+    let payload = null;
+    for (const endpoint of endpoints) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                body: overpassQuery
+            });
+            if (!response.ok) continue;
+            payload = await response.json();
+            break;
+        } catch (error) {
+            console.warn(`Nearby lookup failed on endpoint: ${endpoint}`, error);
+        }
+    }
+    if (!payload) throw new Error('Nearby fetch failed on all endpoints.');
+
+    const stores = (payload.elements || [])
+        .map(entry => normalizeNearbyStore(entry, latitude, longitude))
+        .filter(Boolean)
+        .filter(store => store.distanceKm <= (NEARBY_RADIUS_METERS / 1000));
+
+    const dedup = new Map();
+    stores.forEach(store => {
+        const key = `${store.name.toLowerCase()}-${store.lat.toFixed(4)}-${store.lon.toFixed(4)}`;
+        if (!dedup.has(key) || dedup.get(key).distanceKm > store.distanceKm) dedup.set(key, store);
+    });
+
+    return Array.from(dedup.values()).sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
+function ensureNearbyMap() {
+    const mapEl = document.getElementById('nearby-map');
+    if (!mapEl) return null;
+    if (state.nearbyMap) return state.nearbyMap;
+    if (!window.L) return null;
+
+    state.nearbyMap = L.map(mapEl, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(state.nearbyMap);
+
+    return state.nearbyMap;
+}
+
+function clearNearbyMarkers() {
+    if (!state.nearbyMap || !state.nearbyMarkers.length) return;
+    state.nearbyMarkers.forEach(marker => marker.remove());
+    state.nearbyMarkers = [];
+}
+
+function renderNearbyMap() {
+    const mapEl = document.getElementById('nearby-map');
+    if (!mapEl) return;
+
+    const map = ensureNearbyMap();
+    if (!map || !state.nearbyLocation) return;
+
+    mapEl.classList.add('ready');
+    setTimeout(() => map.invalidateSize(), 0);
+    clearNearbyMarkers();
+
+    const userLatLng = [state.nearbyLocation.lat, state.nearbyLocation.lon];
+    const userMarker = L.circleMarker(userLatLng, {
+        radius: 8,
+        color: '#E31837',
+        fillColor: '#FFC72C',
+        fillOpacity: 1,
+        weight: 2
+    }).addTo(map).bindPopup('You are here');
+    state.nearbyMarkers.push(userMarker);
+
+    const radiusCircle = L.circle(userLatLng, {
+        radius: NEARBY_RADIUS_METERS,
+        color: '#E31837',
+        fillColor: '#E31837',
+        fillOpacity: 0.08,
+        weight: 1
+    }).addTo(map);
+    state.nearbyMarkers.push(radiusCircle);
+
+    const bounds = [userLatLng];
+    state.nearbyStores.forEach(store => {
+        const latLng = [store.lat, store.lon];
+        bounds.push(latLng);
+        const marker = L.marker(latLng)
+            .addTo(map)
+            .bindPopup(`<strong>${store.name}</strong><br>${store.distanceKm.toFixed(2)} km`);
+        state.nearbyMarkers.push(marker);
+    });
+
+    map.fitBounds(bounds, { padding: [20, 20] });
+}
+
+function renderNearbyStoresSection() {
+    const listEl = document.getElementById('nearby-list');
+    const mapEl = document.getElementById('nearby-map');
+    if (!listEl || !mapEl) return;
+
+    const strings = getStrings();
+    if (!state.nearbyLocation || !state.nearbyStores.length) {
+        mapEl.classList.remove('ready');
+        clearNearbyMarkers();
+        listEl.innerHTML = `
+      <div class="nearby-empty">
+        ${strings.nearbySubtitle || 'Use my location and list every chicken store found nearby.'}
+      </div>
+    `;
+        return;
+    }
+
+    listEl.innerHTML = state.nearbyStores.map(store => `
+    <article class="nearby-item">
+      <div class="nearby-item-main">
+        <h4>${store.name}</h4>
+        <p>${store.address || '-'}</p>
+      </div>
+      <div class="nearby-item-side">
+        <strong>${store.distanceKm.toFixed(2)} km</strong>
+        <a href="${store.mapLink}" target="_blank" rel="noopener">${strings.nearbyOpenMap || 'Open in map'}</a>
+      </div>
+    </article>
+  `).join('');
+
+    renderNearbyMap();
+}
+
+function handleFindNearbyStores() {
+    const strings = getStrings();
+    if (!navigator.geolocation) {
+        setNearbyStatus(strings.nearbyUnsupported || 'Geolocation is not supported in this browser.', 'error');
+        return;
+    }
+
+    setNearbyStatus(strings.nearbyLoading || 'Finding nearby stores...', 'loading');
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        try {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const stores = await fetchNearbyChickenStores(lat, lon);
+
+            state.nearbyLocation = { lat, lon };
+            state.nearbyStores = stores;
+
+            if (!stores.length) {
+                setNearbyStatus(strings.nearbyNoStores || 'No chicken stores found within 10km.', 'warning');
+            } else {
+                const lang = state.language || 'en';
+                const suffix = strings.nearbyFoundSuffix || 'stores found within 10km';
+                const countMessage = (lang === 'ko' || lang === 'zh' || lang === 'ja')
+                    ? `${stores.length}${suffix}`
+                    : `${stores.length} ${suffix}`;
+                setNearbyStatus(countMessage, 'success');
+            }
+
+            renderNearbyStoresSection();
+        } catch (error) {
+            console.error('Failed to find nearby stores:', error);
+            const lang = state.language || 'en';
+            const message = lang === 'ko'
+                ? '주변 매장 조회에 실패했습니다. 잠시 후 다시 시도해주세요.'
+                : lang === 'zh'
+                    ? '附近门店查询失败，请稍后重试。'
+                    : lang === 'ja'
+                        ? '近くの店舗検索に失敗しました。時間をおいて再試行してください。'
+                        : 'Nearby store lookup failed. Please try again.';
+            setNearbyStatus(message, 'error');
+        }
+    }, () => {
+        setNearbyStatus(strings.nearbyNeedPermission || 'Location permission is required to find nearby stores.', 'error');
+    }, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+    });
 }
 
 // ========== Translation Helpers ==========
@@ -1298,6 +1754,17 @@ function applyTranslations(lang) {
     update('btn-results-unlock', strings.unlockPremium);
     update('btn-results-retry', strings.tryAgain);
     update('locked-section-title', strings.premiumUnlocks);
+    update('nearby-title', strings.nearbyTitle);
+    update('nearby-subtitle', strings.nearbySubtitle);
+    update('nearby-find-btn', strings.nearbyFindBtn);
+
+    if (state.nearbyStores.length) {
+        const suffix = strings.nearbyFoundSuffix || 'stores found within 10km';
+        const countMessage = (lang === 'ko' || lang === 'zh' || lang === 'ja')
+            ? `${state.nearbyStores.length}${suffix}`
+            : `${state.nearbyStores.length} ${suffix}`;
+        setNearbyStatus(countMessage, 'success');
+    }
 
     // Recalculate stats text in new language
     initStats();
@@ -1311,6 +1778,8 @@ function applyTranslations(lang) {
     // Re-render results/cards if active 
     if (state.currentPage === 'results') {
         renderResults();
+    } else {
+        renderNearbyStoresSection();
     }
 }
 
